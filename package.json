@@ -7,8 +7,9 @@
     "test": "rm -rf build && bash scripts/test.sh",
     "test:gas": "GAS_REPORTER=true npm test",
     "compile": "truffle compile",
+    "console": "truffle console",
     "lint": "solium --dir ./contracts",
-    "deploy:ganache": "rm -rf build && truffle deploy --reset --network ganache",
+    "deploy:ganache": "rm -rf build && truffle deploy --reset --network development",
     "deploy:rinkeby": "rm -rf build && truffle deploy --reset --network rinkeby"
   },
   "keywords": [

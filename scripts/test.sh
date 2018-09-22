@@ -25,4 +25,4 @@ else
   start_ganache
 fi
 
-truffle test --network development
+truffle test --network test

@@ -1,6 +1,7 @@
 pragma solidity 0.4.24;
 
 import "./ZUBG/ZUBGGameModeContract.sol";
+import "./ZUBG/Enum.sol";
 
 // ExampleGameMode
 contract ExampleGame is ZUBGGameMode  {
@@ -9,6 +10,7 @@ contract ExampleGame is ZUBGGameMode  {
         return "ExampleGame";
     }
 
-    function GameStart() external {
+    function GameStart() external returns (uint) {
+        return uint(ZUBGEnum.AbilityCall.Attack);
     }
 }

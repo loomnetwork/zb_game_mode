@@ -1,0 +1,29 @@
+const { soliditySha3 } = require('web3-utils')
+const { assertEventVar,
+    expectThrow,
+} = require('./helpers')
+const { BigNumber } = web3
+const bnChai = require('bn-chai')
+
+require('chai')
+    .use(require('chai-as-promised'))
+    .use(require('chai-bignumber')(BigNumber))
+    .should()
+
+const ExampleGame = artifacts.require('ExampleGame')
+
+contract('ExampleGame', accounts => {
+    let exampleGame
+    const  [ alice, bob, carlos ] = accounts;
+
+    beforeEach(async () => {
+        exampleGame = await ExampleGame.new()
+    });
+
+    it('Should ExampleGame be deployed', async () => {
+        exampleGame.address.should.not.be.null
+
+        const name = await exampleGame.name.call()
+        name.should.be.equal('ExampleGame')
+    })
+})

@@ -172,7 +172,7 @@ contract('ConquerMode', accounts => {
        vals[0].toNumber().should.be.equal(30)
 
        //Randomize Deck
-       cfgs[1].toNumber().should.be.equal(3)
+       cfgs[1].toNumber().should.be.equal(2)
        vals[1].toNumber().should.be.equal(1)
     })
 

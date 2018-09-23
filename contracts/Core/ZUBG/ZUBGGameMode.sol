@@ -7,7 +7,7 @@ import "./Enum.sol";
 import "openzeppelin-solidity/contracts/introspection/SupportsInterfaceWithLookup.sol";
 
 
-contract ZUBGGameMode is ZUBGMode, SupportsInterfaceWithLookup {
+contract ZUBGGameMode is ZUBGMode, SupportsInterfaceWithLookup, ZUBGEnum {
     //define properties of the game
     uint[] staticConfigs;
     uint[] staticConfigValues;

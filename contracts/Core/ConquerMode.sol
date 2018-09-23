@@ -39,7 +39,7 @@ contract ConquerMode is ZUBGGameMode  {
 
     constructor() public {
         //Define major attributes of the game 
-        staticConfigs = [1,3];
+        staticConfigs = [uint(StaticGameConfig.Health),uint(StaticGameConfig.Customdeck)];
         staticConfigValues = [30,1];
         values = [1,2,3,4,5,6];
     }

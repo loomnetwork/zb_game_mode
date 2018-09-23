@@ -5,8 +5,6 @@ import "./ZUBG/Enum.sol";
 
 
 contract ConquerMode is ZUBGGameMode  {
-    uint[] values;
-
     enum Stages {
         Paid,
         Playing,
@@ -35,35 +33,28 @@ contract ConquerMode is ZUBGGameMode  {
         return  userAccts.length;
     }
 
-    //TODO figure out how to get structs back to the javascript
-    function Wins(address useraddr)  view public returns (uint) {
-        UserGame storage userS = userGames[useraddr];
-        return userS.wins;
-    }
-    function Loses(address useraddr)  view public returns (uint) {
-        UserGame storage userS = userGames[useraddr];
-        return userS.loses;
-    }
-
-    function Status(address useraddr)  view public returns (uint) {
-        UserGame storage userS = userGames[useraddr];
-        return userS.status;
-    }
-
     function name() external view returns (string) {
         return  "ConquerMode";
     }
 
     constructor() public {
+        //Define major attributes of the game 
+        staticConfigs = [1,3];
+        staticConfigValues = [30,1];
+        values = [1,2,3,4,5,6];
     }
 
-    //TODO take payment confirmation
-    function RegisterGame(address useraddr) external {
+    //TODO take payment confirmation, with the ticketID and r,s,v
+    //TODO         onlyWithThreshold(createMessage(keccak256(abi.encodePacked("mint", _tokenId, _tokenDNA))), _v, _r, _s)
+    function RegisterGame(address useraddr, uint256 ticketId, uint256 gameId,  uint8[] _v,  bytes32[] _r, bytes32[] _s) external {
         UserGame storage userS = userGames[useraddr];
-        
+        assert(gameId == 1); //make sure you cant use tickets from other games, we may use the public address in future
+
         userS.status = uint(Stages.Paid);
         
         userAccts.push(useraddr);
+
+        //TODO make sure ticket is only used once
 
         emit ZUBGGameMode.UserRegistered(useraddr);
     }   

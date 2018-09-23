@@ -12,18 +12,11 @@ require('chai')
 
 
 
-
-//TODO Req #1 Allow Payment to play this mode?
-//a) use payable method
-//b) allow loom store to sign a package verifying payment
-//TODO Req #2 pick random card 30 times
-
-
 const ConquerMode = artifacts.require('ConquerMode')
 
 contract('ConquerMode', accounts => {
     let conquerMode
-    const  [ alice, bob, carlos, james, luke, greg ] = accounts;
+    const  [ loomMarketPlace1, loomMarketPlace2, loomMarketPlace3, alice, bob, carlos, james, luke, greg ] = accounts;
 
     beforeEach(async () => {
         conquerMode = await ConquerMode.new()
@@ -38,30 +31,62 @@ contract('ConquerMode', accounts => {
 
 
     it('Should ConquerMode registering should transistion', async () => {
-        const tx = await conquerMode.RegisterGame(alice)
+        const tx = await conquerMode.RegisterGame(alice,1,1,[],[],[])
 //        assertEventVar(tx, 'UserRegisterd', '_from', alice)
+        await conquerMode.GameStart(alice, bob)
 
 
         const cnt = await conquerMode.activeUsers()
         cnt.toNumber().should.be.equal(1)
 
-        const name = await conquerMode.userGames.call(alice)
-        console.log("result userGames ", name)
-        //name.should.be.equal(alice) //should be a UserGame structure
+        const aliceGame = await conquerMode.userGames.call(alice)
+        console.log("result userGames ", aliceGame)
+        aliceGame.status.toNumber().should.be.equal(1) //should be a UserGame structure
 
         const name2 = await conquerMode.userAccts.call(0)
-        console.log("result userGames ", name2)
+        console.log("result userAcct ", name2)
         name2.should.be.equal(alice)
     })
+    
 
+    function registerGameWithSign(){
+
+    }
+    
     //Req #0 Track matches, 
     //Req #4 Track matches, win 7 matches you get your gold back
     //Req #5 12 is max plays
     //Req #5 after 3 losses you are out
     it('Should ConquerMode payout on 7 wins, and kick you out on 3 loses', async () => {
-        await conquerMode.RegisterGame(alice)
-        await conquerMode.RegisterGame(bob)
-        await conquerMode.RegisterGame(carlos)
+        const signers = accounts.slice(0, 3)
+        signers.sort()
+
+    
+        gameId = 1;
+
+        ticketId = 123;
+
+        //TODO need to verify this is the correct hash parameters
+        const hash = soliditySha3("ticket", ticketId, gameId);
+        
+        const sigV = []
+        const sigR = []
+        const sigS = []
+        
+        for (let i = 0; i < signers.length; i++) {
+            const sig = (await web3.eth.sign(hash, signers[i])).slice(2)
+            const r = '0x' + sig.substring(0, 64)
+            const s = '0x' + sig.substring(64, 128)
+            const v = parseInt(sig.substring(128, 130), 16) + 27
+            sigV.push(v)
+            sigR.push(r)
+            sigS.push(s)
+        }
+        await conquerMode.RegisterGame(alice, ticketId, gameId, sigV, sigR, sigS)
+
+        //TODO we shouldnt be able to reuse a ticket across multiple users
+        await conquerMode.RegisterGame(bob, ticketId, gameId, sigV, sigR, sigS)
+        await conquerMode.RegisterGame(carlos, ticketId, gameId, sigV, sigR, sigS)
 
         await conquerMode.GameStart(alice, bob)
 
@@ -70,26 +95,24 @@ contract('ConquerMode', accounts => {
 
         await conquerMode.GameStart(alice, carlos)
 
-        let aliceWins = await conquerMode.Wins(alice)
-        aliceWins.toNumber().should.be.equal(1)
-        let aliceLoses = await conquerMode.Loses(alice)
-        aliceLoses.toNumber().should.be.equal(1)
-        let aliceState = await conquerMode.Status(alice)
-        aliceState.toNumber().should.be.equal(1) // Playing
 
-        let bobWins = await conquerMode.Wins(bob)
-        bobWins.toNumber().should.be.equal(1)
-        let bobLoses = await conquerMode.Loses(bob)
-        bobLoses.toNumber().should.be.equal(1)
-        let bobState = await conquerMode.Status(bob)
-        bobLoses.toNumber().should.be.equal(1)
+        let aliceGame = await conquerMode.userGames.call(alice)
+
+        aliceGame.wins.toNumber().should.be.equal(1)
+        aliceGame.loses.toNumber().should.be.equal(1)
+        aliceGame.status.toNumber().should.be.equal(1) // Playing
+
+        let bobGame = await conquerMode.userGames.call(bob)
+        bobGame.wins.toNumber().should.be.equal(1)
+        bobGame.loses.toNumber().should.be.equal(1)
+        bobGame.status.toNumber().should.be.equal(1)
 
         await conquerMode.GameFinished(alice, bob, 1)
         await conquerMode.GameFinished(alice, bob, 1)
 
         //see that Bob is removed from conquer mod
-        bobState = await conquerMode.Status(bob)
-        bobState.toNumber().should.be.equal(2)
+        bobGame = await conquerMode.userGames.call(bob)
+        bobGame.status.toNumber().should.be.equal(2)
 
         await conquerMode.GameFinished(alice, carlos, 1)
         await conquerMode.GameFinished(alice, carlos, 1)
@@ -102,8 +125,8 @@ contract('ConquerMode', accounts => {
         assertEventVar(tx, 'AwardTokens', 'to', alice)
         assertEventVar(tx, 'AwardTokens', 'tokens', 25)
 
-        aliceWins = await conquerMode.Wins(alice)
-        aliceWins.toNumber().should.be.equal(7)
+        aliceGame = await conquerMode.userGames.call(alice)
+        aliceGame.wins.toNumber().should.be.equal(7)
 
 
         await conquerMode.GameFinished(alice, james, 1)
@@ -114,18 +137,17 @@ contract('ConquerMode', accounts => {
         const tx2 = await conquerMode.GameFinished(alice, greg, 1)
 
         
-        bobWins = await conquerMode.Wins(bob)
-        bobWins.toNumber().should.be.equal(1)
-        bobLoses = await conquerMode.Loses(bob)
-        bobLoses.toNumber().should.be.equal(3)
-        let carlosLoses = await conquerMode.Loses(carlos)
-        carlosLoses.toNumber().should.be.equal(3)
+        bobGame = await conquerMode.userGames.call(bob)
+        bobGame.wins.toNumber().should.be.equal(1)
+        bobGame.loses.toNumber().should.be.equal(3)
+
+        carlosGame = await conquerMode.userGames.call(carlos)
+        carlosGame.loses.toNumber().should.be.equal(3)
 
         //Alice got 12 wins lets make sure she is finished
-        aliceWins = await conquerMode.Wins(alice)
-        aliceWins.toNumber().should.be.equal(12)
-        aliceState = await conquerMode.Status(alice)
-        aliceState.toNumber().should.be.equal(2) // Finished
+        aliceGame = await conquerMode.userGames.call(alice)
+        aliceGame.wins.toNumber().should.be.equal(12)
+        aliceGame.status.toNumber().should.be.equal(2) // Finished
 
         //see that alice gets a card pack payout 
         assertEventVar(tx2, 'AwardPack', 'to', alice)
@@ -133,8 +155,64 @@ contract('ConquerMode', accounts => {
         assertEventVar(tx2, 'AwardPack', 'packType', 0)
 
         //Alice should be finished
-        aliceState = await conquerMode.Status(alice)
-        aliceState.toNumber().should.be.equal(2)
+        aliceGame = await conquerMode.userGames.call(alice)
+        aliceGame.status.toNumber().should.be.equal(2)
+    })
+
+
+    //Override health to 30 
+    //Override desk to be custom deck
+    it('Should ConquerMode should set correct static overrides', async () => {
+       let res = await conquerMode.getStaticConfigs.call()
+       console.log("cfgs", res)
+       cfgs = res['0']
+       vals = res['1']
+       //health should be 30
+       cfgs[0].toNumber().should.be.equal(1)
+       vals[0].toNumber().should.be.equal(30)
+
+       //Randomize Deck
+       cfgs[1].toNumber().should.be.equal(3)
+       vals[1].toNumber().should.be.equal(1)
+    })
+
+    //TODO Req #2 pick random card 30 times
+    it('Should ConquerMode should be able to randomize the decs', async () => {
+    })
+
+    //Req #1 Allow Payment to play this mode?
+    //a) use payable method
+    //b) allow loom store to sign a package verifying payment
+    it('Should ConquerMode verify payment works', async () => {
+        /*
+        const signers = accounts.slice(0, 3)
+        signers.sort()
+
+        ticketId = 123;
+        gameId = 1;
+
+        //TODO need to verify this is the correct hash parameters
+        const hash = soliditySha3("ticket", ticketId, gameId);
+      
+          const sigV = []
+          const sigR = []
+          const sigS = []
+      
+          for (let i = 0; i < signers.length; i++) {
+            const sig = (await web3.eth.sign(hash, signers[i])).slice(2)
+            const r = '0x' + sig.substring(0, 64)
+            const s = '0x' + sig.substring(64, 128)
+            const v = parseInt(sig.substring(128, 130), 16) + 27
+            sigV.push(v)
+            sigR.push(r)
+            sigS.push(s)
+          }
+
+        //TODO we shouldnt be able to reuse a ticket across multiple users
+        await conquerMode.RegisterGame(alice, ticketId, gameId, sigV, sigR, sigS)
+        await conquerMode.RegisterGame(bob, ticketId, gameId, sigV, sigR, sigS)
+        //Need to catch an assert here
+        */
     })
 
 })

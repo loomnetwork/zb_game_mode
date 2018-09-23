@@ -1,6 +1,6 @@
 pragma solidity 0.4.24;
 
 
-contract ZUBGGameMode {
+interface ZUBGMode {
     function name() external view returns (string);
 }

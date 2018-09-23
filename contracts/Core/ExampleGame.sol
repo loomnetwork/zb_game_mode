@@ -1,6 +1,6 @@
 pragma solidity 0.4.24;
 
-import "./ZUBG/ZUBGGameModeContract.sol";
+import "./ZUBG/ZUBGGameMode.sol";
 import "./ZUBG/Enum.sol";
 
 // ExampleGameMode

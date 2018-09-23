@@ -1,6 +1,6 @@
 pragma solidity 0.4.24;
 
-import "./ZUBG/ZUBGGameModeContract.sol";
+import "./ZUBG/ZUBGGameMode.sol";
 import "./ZUBG/Enum.sol";
 
 
@@ -55,32 +55,7 @@ contract ConquerMode is ZUBGGameMode  {
     }
 
     constructor() public {
-        values = [1,2,3,4,5,6];
     }
-
-    event UserRegistered(
-        address indexed _from
-    );
-    event MatchedStarted(
-        address indexed _from
-    );
-    event MatchFinished(
-        address player1Addr,  address player2Addr, uint winner
-    );    
-    event AwardTokens(
-        address indexed to,
-        uint tokens //TODO we need to know how much the game original cost and how much reward is
-    );
-    //Awards a specific Card
-    event AwardCard(
-        address indexed to,
-        uint cardID
-    );
-    event AwardPack(
-        address indexed to,
-        uint packCount,
-        uint packType
-    );
 
     //TODO take payment confirmation
     function RegisterGame(address useraddr) external {
@@ -90,7 +65,7 @@ contract ConquerMode is ZUBGGameMode  {
         
         userAccts.push(useraddr);
 
-        emit UserRegistered(useraddr);
+        emit ZUBGGameMode.UserRegistered(useraddr);
     }   
 
     function GameStart(address useraddr1, address useraddr2) external {
@@ -103,8 +78,8 @@ contract ConquerMode is ZUBGGameMode  {
         player1.status = uint(Stages.Playing);
         player2.status = uint(Stages.Playing);
 
-        emit MatchedStarted(useraddr1);
-        emit MatchedStarted(useraddr2);
+        emit ZUBGGameMode.MatchedStarted(useraddr1);
+        emit ZUBGGameMode.MatchedStarted(useraddr2);
     }
 
     //TODO should we break this into two events, 1 per player?
@@ -125,10 +100,10 @@ contract ConquerMode is ZUBGGameMode  {
 
             //TODO perhaps switch this to a state machine
             if(player1.wins == 7){
-                emit AwardTokens(player1Addr, costToEnter);
+                emit ZUBGGameMode.AwardTokens(player1Addr, costToEnter);
             }
             if(player1.wins == 12){
-                emit AwardPack(player1Addr, 1, 0);
+                emit ZUBGGameMode.AwardPack(player1Addr, 1, 0);
                 player1.status = uint(Stages.Finished);
             }
             if(player2.loses == 3){
@@ -140,10 +115,10 @@ contract ConquerMode is ZUBGGameMode  {
 
             //TODO perhaps switch this to a state machine
             if(player2.wins == 7){
-                emit AwardTokens(player2Addr, costToEnter);
+                emit ZUBGGameMode.AwardTokens(player2Addr, costToEnter);
             }
             if(player2.wins == 12){
-                emit AwardPack(player2Addr, 1, 0);
+                emit ZUBGGameMode.AwardPack(player2Addr, 1, 0);
                 player1.status = uint(Stages.Finished);
             }
             if(player1.loses == 3){
@@ -151,6 +126,6 @@ contract ConquerMode is ZUBGGameMode  {
             }
         }
 
-        emit MatchFinished(player1Addr, player2Addr, winner);
+        emit ZUBGGameMode.MatchFinished(player1Addr, player2Addr, winner);
     }
 }

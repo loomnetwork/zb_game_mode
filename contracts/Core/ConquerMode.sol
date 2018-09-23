@@ -84,48 +84,49 @@ contract ConquerMode is ZUBGGameMode  {
 
     //TODO should we break this into two events, 1 per player?
     function GameFinished(address player1Addr,  address player2Addr, uint winner ) external  {
-        UserGame storage player1 = userGames[player1Addr]; 
-        UserGame storage player2 = userGames[player2Addr]; 
+        uint player1Wins = 3;
+        uint player2Wins = 3;
 
-        //Yikes ! prevent from double awarding or anything funny
-        assert(player1.status != uint(Stages.Finished));
-        assert(player2.status != uint(Stages.Finished));
-
-        //In theory this should handle mulligans also
-        player1.gamesCount += 1;
-        player2.gamesCount += 2;
-        if (winner == 1) {
-            player1.wins += 1;
-            player2.loses += 1;
-
-            //TODO perhaps switch this to a state machine
-            if(player1.wins == 7){
-                emit ZUBGGameMode.AwardTokens(player1Addr, costToEnter);
-            }
-            if(player1.wins == 12){
-                emit ZUBGGameMode.AwardPack(player1Addr, 1, 0);
-                player1.status = uint(Stages.Finished);
-            }
-            if(player2.loses == 3){
-                player2.status = uint(Stages.Finished);
-            }            
-        } else if (winner == 2) {
-            player1.loses += 1;
-            player2.wins += 1;
-
-            //TODO perhaps switch this to a state machine
-            if(player2.wins == 7){
-                emit ZUBGGameMode.AwardTokens(player2Addr, costToEnter);
-            }
-            if(player2.wins == 12){
-                emit ZUBGGameMode.AwardPack(player2Addr, 1, 0);
-                player1.status = uint(Stages.Finished);
-            }
-            if(player1.loses == 3){
-                player1.status = uint(Stages.Finished);
-            }
+        if(winner == 1) {
+            player1Wins = 1;
+            player2Wins = 0;
+        } else if(winner == 2) {
+            player1Wins = 0;
+            player2Wins = 1;
         }
 
+        gameFinishedPlayer(player1Addr, player1Wins);
+        gameFinishedPlayer(player2Addr, player2Wins);
+
         emit ZUBGGameMode.MatchFinished(player1Addr, player2Addr, winner);
+    }
+
+    // winner 0, for lose, 1 for win, 2 for muligan
+    function gameFinishedPlayer(address playerAddr, uint winner) private {
+        UserGame storage player = userGames[playerAddr]; 
+
+        //Yikes ! prevent from double awarding or anything funny
+        assert(player.status != uint(Stages.Finished));
+
+        //In theory this should handle mulligans also
+        player.gamesCount += 1;
+        if (winner == 1) {
+            player.wins += 1;
+
+            //TODO perhaps switch this to a state machine
+            if(player.wins == 7){
+                emit ZUBGGameMode.AwardTokens(playerAddr, costToEnter);
+            }
+            if(player.wins == 12){
+                emit ZUBGGameMode.AwardPack(playerAddr, 1, 0);
+                player.status = uint(Stages.Finished);
+            }
+        } else if (winner == 0) {
+            player.loses += 1;
+
+            if(player.loses == 3){
+                player.status = uint(Stages.Finished);
+            }
+        }
     }
 }

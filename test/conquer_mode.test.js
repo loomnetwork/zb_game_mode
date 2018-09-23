@@ -11,22 +11,6 @@ require('chai')
     .should()
 
 
-// ConquerMode
-// Upon entering the Arena, the player will be allowed to select one of three randomly selected classes.
-// They can then choose from a series of randomly selected cards to build a new, unique deck.
-// Unlike other play modes these cards are not limited by the player's current collection, 
-// and there is no limit on the number of each card that can be included in a deck (including legendaries). 
-// Players then use their decks to do battle until they have suffered 3 losses, or claimed 12 victories,
-// at which point they will be granted a number of rewards depending on their success.
-// Winning at least 7 games before being eliminated guarantees that the player will earn their entry fee back in gold. 
-// Players do not have to play all of their Arena games in one go, and can return to continue their run whenever they wish.
-
-
-//TODO Req #0 Track matches, 
-//TODO Req #4 Track matches, win 7 matches you get your gold back
-//TODO Req #5 12 is max plays
-//TODO Req #5 after 3 losses you are out
-
 
 
 //TODO Req #1 Allow Payment to play this mode?
@@ -39,7 +23,7 @@ const ConquerMode = artifacts.require('ConquerMode')
 
 contract('ConquerMode', accounts => {
     let conquerMode
-    const  [ alice, bob, carlos, james, luke ] = accounts;
+    const  [ alice, bob, carlos, james, luke, greg ] = accounts;
 
     beforeEach(async () => {
         conquerMode = await ConquerMode.new()
@@ -70,22 +54,28 @@ contract('ConquerMode', accounts => {
         name2.should.be.equal(alice)
     })
 
-
+    //Req #0 Track matches, 
+    //Req #4 Track matches, win 7 matches you get your gold back
+    //Req #5 12 is max plays
+    //Req #5 after 3 losses you are out
     it('Should ConquerMode payout on 7 wins, and kick you out on 3 loses', async () => {
         await conquerMode.RegisterGame(alice)
         await conquerMode.RegisterGame(bob)
         await conquerMode.RegisterGame(carlos)
 
+        await conquerMode.GameStart(alice, bob)
+
         await conquerMode.GameFinished(alice, bob, 1)
         await conquerMode.GameFinished(alice, bob, 2)
+
+        await conquerMode.GameStart(alice, carlos)
 
         let aliceWins = await conquerMode.Wins(alice)
         aliceWins.toNumber().should.be.equal(1)
         let aliceLoses = await conquerMode.Loses(alice)
         aliceLoses.toNumber().should.be.equal(1)
         let aliceState = await conquerMode.Status(alice)
-        //TODO set initial state
-        // aliceState.toNumber().should.be.equal(1) // Playing
+        aliceState.toNumber().should.be.equal(1) // Playing
 
         let bobWins = await conquerMode.Wins(bob)
         bobWins.toNumber().should.be.equal(1)
@@ -96,23 +86,55 @@ contract('ConquerMode', accounts => {
 
         await conquerMode.GameFinished(alice, bob, 1)
         await conquerMode.GameFinished(alice, bob, 1)
-        //TODO see that Bob transisited out
+
+        //see that Bob is removed from conquer mod
+        bobState = await conquerMode.Status(bob)
+        bobState.toNumber().should.be.equal(2)
+
         await conquerMode.GameFinished(alice, carlos, 1)
         await conquerMode.GameFinished(alice, carlos, 1)
         await conquerMode.GameFinished(alice, carlos, 1)
-        //TODO see that carlos transisited out
-        await conquerMode.GameFinished(alice, james, 1)
+
+        //see that Bob is removed from conquer mode
+        const tx = await conquerMode.GameFinished(alice, james, 1)
+
+        //see that alice gets her coins back after 7 wins 
+        assertEventVar(tx, 'AwardTokens', 'to', alice)
+        assertEventVar(tx, 'AwardTokens', 'tokens', 25)
 
         aliceWins = await conquerMode.Wins(alice)
         aliceWins.toNumber().should.be.equal(7)
+
+
+        await conquerMode.GameFinished(alice, james, 1)
+        await conquerMode.GameFinished(alice, james, 1)
+
+        await conquerMode.GameFinished(alice, greg, 1)
+        await conquerMode.GameFinished(alice, greg, 1)
+        const tx2 = await conquerMode.GameFinished(alice, greg, 1)
+
+        
         bobWins = await conquerMode.Wins(bob)
         bobWins.toNumber().should.be.equal(1)
         bobLoses = await conquerMode.Loses(bob)
         bobLoses.toNumber().should.be.equal(3)
         let carlosLoses = await conquerMode.Loses(carlos)
         carlosLoses.toNumber().should.be.equal(3)
-        //TODO see that alice gets a payout 
 
+        //Alice got 12 wins lets make sure she is finished
+        aliceWins = await conquerMode.Wins(alice)
+        aliceWins.toNumber().should.be.equal(12)
+        aliceState = await conquerMode.Status(alice)
+        aliceState.toNumber().should.be.equal(2) // Finished
+
+        //see that alice gets a card pack payout 
+        assertEventVar(tx2, 'AwardPack', 'to', alice)
+        assertEventVar(tx2, 'AwardPack', 'packCount', 1)
+        assertEventVar(tx2, 'AwardPack', 'packType', 0)
+
+        //Alice should be finished
+        aliceState = await conquerMode.Status(alice)
+        aliceState.toNumber().should.be.equal(2)
     })
 
 })

@@ -1,10 +1,10 @@
-# ZUBG_GAME_MODE 
+# Zombie_Battleground_GAME_MODE 
 
 Solidity contract templates that lets users create custom game modes for Zombie Battlegrounds.
 
 **Quick Links:**
 
-- [ZUBG Interface](contracts/Interfaces/ZUBG.sol)
+- [Zombie_Battleground Interface](contracts/Interfaces/ZBattlegroundGame.sol)
 
 - [Open source under BSD-3](LICENSE)
 ---
@@ -12,7 +12,7 @@ Solidity contract templates that lets users create custom game modes for Zombie 
 **The ZUBG Interface:**
 
 ```sol
-contract ZUBG {
+contract ZBattlegroundGame {
 
 }
 ```

@@ -11,7 +11,6 @@ contract ZUBGGameMode is ZUBGMode, SupportsInterfaceWithLookup, ZUBGEnum {
     //define properties of the game
     uint[] staticConfigs;
     uint[] staticConfigValues;
-uint[] values;
 
     event MatchedStarted(
         address indexed _from

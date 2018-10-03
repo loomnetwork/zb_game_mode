@@ -3,7 +3,7 @@
 
 pragma solidity ^0.4.24;
 
-contract ZUBGEnum {
+contract ZBEnum {
 
 
     enum AbilityActivity  {Passive,Active}

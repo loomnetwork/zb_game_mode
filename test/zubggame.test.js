@@ -11,7 +11,7 @@ require('chai')
     .should()
 
 const ExampleGame = artifacts.require('ExampleGame')
-const ZUBGEnum = artifacts.require('ZUBGEnum')
+const ZBEnum = artifacts.require('ZBEnum')
 
 contract('ExampleGame', accounts => {
     let exampleGame
@@ -20,7 +20,7 @@ contract('ExampleGame', accounts => {
 
     beforeEach(async () => {
         exampleGame = await ExampleGame.new()
-        zenum =  await ZUBGEnum.new()
+        zenum =  await ZBEnum.new()
     });
 
     it('Should ExampleGame be deployed', async () => {

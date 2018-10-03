@@ -1,6 +1,6 @@
 pragma solidity 0.4.24;
 
 
-interface ZUBGMode {
+interface ZBMode {
     function name() external view returns (string);
 }

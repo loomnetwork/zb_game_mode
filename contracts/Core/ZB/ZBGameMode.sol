@@ -1,13 +1,13 @@
 pragma solidity ^0.4.24;
 
-import "./../../Interfaces/ZUBGGameMode.sol";
+import "./../../Interfaces/ZBMode.sol";
 //import "./../../Interfaces/ERC721XReceiver.sol";
-import "./Enum.sol";
+import "./ZBEnum.sol";
 
 import "openzeppelin-solidity/contracts/introspection/SupportsInterfaceWithLookup.sol";
 
 
-contract ZUBGGameMode is ZUBGMode, SupportsInterfaceWithLookup, ZUBGEnum {
+contract ZBGameMode is ZBMode, SupportsInterfaceWithLookup, ZBEnum {
     //define properties of the game
     uint[] staticConfigs;
     uint[] staticConfigValues;
@@ -17,10 +17,10 @@ contract ZUBGGameMode is ZUBGMode, SupportsInterfaceWithLookup, ZUBGEnum {
     );
     event MatchFinished(
         address player1Addr,  address player2Addr, uint winner
-    );    
+    );
     event AwardTokens(
         address indexed to,
-        uint tokens 
+        uint tokens
     );
     //Awards a specific Card
     event AwardCard(
@@ -41,7 +41,7 @@ contract ZUBGGameMode is ZUBGMode, SupportsInterfaceWithLookup, ZUBGEnum {
         uint counter = 0;
         for (uint i = 0; i < v.length; i++) {
             if (v[i] % 2 != 0) {
-                counter++;   
+                counter++;
             }
         }
 

@@ -1,10 +1,10 @@
 pragma solidity 0.4.24;
 
-import "./ZUBG/ZUBGGameMode.sol";
-import "./ZUBG/Enum.sol";
+import "./ZB/ZBGameMode.sol";
+import "./ZB/ZBEnum.sol";
 
 
-contract ConquerMode is ZUBGGameMode  {
+contract ConquerMode is ZBGameMode  {
     enum Stages {
         Paid,
         Playing,
@@ -25,7 +25,7 @@ contract ConquerMode is ZUBGGameMode  {
     }
 
     mapping(address => UserGame) public userGames;
-    address[] public userAccts; 
+    address[] public userAccts;
 
     uint public costToEnter = 25; //TODO lets make this configurable
 
@@ -38,7 +38,7 @@ contract ConquerMode is ZUBGGameMode  {
     }
 
     constructor() public {
-        //Define major attributes of the game 
+        //Define major attributes of the game
         staticConfigs = [uint(StaticGameConfig.Health),uint(StaticGameConfig.Customdeck)];
         staticConfigValues = [30,1];
     }
@@ -50,26 +50,26 @@ contract ConquerMode is ZUBGGameMode  {
         assert(gameId == 1); //make sure you cant use tickets from other games, we may use the public address in future
 
         userS.status = uint(Stages.Paid);
-        
+
         userAccts.push(useraddr);
 
         //TODO make sure ticket is only used once
 
-        emit ZUBGGameMode.UserRegistered(useraddr);
-    }   
+        emit ZBGameMode.UserRegistered(useraddr);
+    }
 
     function GameStart(address useraddr1, address useraddr2) external {
         UserGame storage player1 = userGames[useraddr1];
         UserGame storage player2 = userGames[useraddr2];
-        
+
         assert(player1.status != uint(Stages.Finished));
         assert(player2.status != uint(Stages.Finished));
 
         player1.status = uint(Stages.Playing);
         player2.status = uint(Stages.Playing);
 
-        emit ZUBGGameMode.MatchedStarted(useraddr1);
-        emit ZUBGGameMode.MatchedStarted(useraddr2);
+        emit ZBGameMode.MatchedStarted(useraddr1);
+        emit ZBGameMode.MatchedStarted(useraddr2);
     }
 
     //TODO should we break this into two events, 1 per player?
@@ -88,12 +88,12 @@ contract ConquerMode is ZUBGGameMode  {
         gameFinishedPlayer(player1Addr, player1Wins);
         gameFinishedPlayer(player2Addr, player2Wins);
 
-        emit ZUBGGameMode.MatchFinished(player1Addr, player2Addr, winner);
+        emit ZBGameMode.MatchFinished(player1Addr, player2Addr, winner);
     }
 
     // winner 0, for lose, 1 for win, 2 for muligan
     function gameFinishedPlayer(address playerAddr, uint winner) private {
-        UserGame storage player = userGames[playerAddr]; 
+        UserGame storage player = userGames[playerAddr];
 
         //Yikes ! prevent from double awarding or anything funny
         assert(player.status != uint(Stages.Finished));
@@ -105,10 +105,10 @@ contract ConquerMode is ZUBGGameMode  {
 
             //TODO perhaps switch this to a state machine
             if(player.wins == 7){
-                emit ZUBGGameMode.AwardTokens(playerAddr, costToEnter);
+                emit ZBGameMode.AwardTokens(playerAddr, costToEnter);
             }
             if(player.wins == 12){
-                emit ZUBGGameMode.AwardPack(playerAddr, 1, 0);
+                emit ZBGameMode.AwardPack(playerAddr, 1, 0);
                 player.status = uint(Stages.Finished);
             }
         } else if (winner == 0) {

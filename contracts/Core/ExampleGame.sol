@@ -1,10 +1,10 @@
 pragma solidity 0.4.24;
 
-import "./ZUBG/ZUBGGameMode.sol";
-import "./ZUBG/Enum.sol";
+import "./ZB/ZBGameMode.sol";
+import "./ZB/ZBEnum.sol";
 
 // ExampleGameMode
-contract ExampleGame is ZUBGGameMode  {
+contract ExampleGame is ZBGameMode  {
     uint[] values;
 
     function name() external view returns (string) {
@@ -16,14 +16,14 @@ contract ExampleGame is ZUBGGameMode  {
     }
 
     function GameStart() external pure returns (uint) {
-        return uint(ZUBGEnum.AbilityCall.Attack);
+        return uint(ZBEnum.AbilityCall.Attack);
     }
 
     function countOdds(uint[] v) internal pure returns(uint) {
         uint counter = 0;
         for (uint i = 0; i < v.length; i++) {
             if (v[i] % 2 != 0) {
-                counter++;   
+                counter++;
             }
         }
 

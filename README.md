@@ -9,7 +9,7 @@ Solidity contract templates that lets users create custom game modes for Zombie 
 - [Open source under BSD-3](LICENSE)
 ---
 
-**The ZUBG Interface:**
+**The ZB Interface:**
 
 ```sol
 contract ZBattlegroundGame {

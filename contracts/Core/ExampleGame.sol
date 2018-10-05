@@ -45,4 +45,8 @@ contract ExampleGame is ZBGameMode  {
         return (v, b);
 
     }
+
+    function onMatchStarting(bytes gameState) public returns(bytes) {
+        return new bytes(0);
+    }
 }

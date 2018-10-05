@@ -3,11 +3,12 @@ pragma solidity ^0.4.24;
 import "./../../Interfaces/ZBMode.sol";
 //import "./../../Interfaces/ERC721XReceiver.sol";
 import "./ZBEnum.sol";
+import "./../../3rdParty/Seriality/Seriality.sol";
 
 import "openzeppelin-solidity/contracts/introspection/SupportsInterfaceWithLookup.sol";
 
 
-contract ZBGameMode is ZBMode, SupportsInterfaceWithLookup, ZBEnum {
+contract ZBGameMode is ZBMode, SupportsInterfaceWithLookup, ZBEnum, Seriality {
     //define properties of the game
     uint[] staticConfigs;
     uint[] staticConfigValues;
@@ -57,5 +58,9 @@ contract ZBGameMode is ZBMode, SupportsInterfaceWithLookup, ZBEnum {
         }
 
         return (v, b);
+    }
+
+    function onMatchStarting(bytes gameState) public returns(bytes) {
+        return new bytes(0);
     }
 }

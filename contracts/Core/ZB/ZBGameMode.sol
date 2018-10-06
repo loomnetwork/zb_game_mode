@@ -3,16 +3,12 @@ pragma solidity ^0.4.24;
 import "./../../Interfaces/ZBMode.sol";
 //import "./../../Interfaces/ERC721XReceiver.sol";
 import "./ZBEnum.sol";
-import "./../../3rdParty/Seriality/Seriality.sol";
+import "./../ZBGameModeSerialization.sol";
 
-import "openzeppelin-solidity/contracts/introspection/SupportsInterfaceWithLookup.sol";
+//import "openzeppelin-solidity/contracts/introspection/SupportsInterfaceWithLookup.sol";
 
 
-contract ZBGameMode is ZBMode, SupportsInterfaceWithLookup, ZBEnum, Seriality {
-    //define properties of the game
-    uint[] staticConfigs;
-    uint[] staticConfigValues;
-
+contract ZBGameMode is ZBMode, ZBEnum, ZBGameModeSerialization {
     event MatchedStarted(
         address indexed _from
     );
@@ -36,29 +32,6 @@ contract ZBGameMode is ZBMode, SupportsInterfaceWithLookup, ZBEnum, Seriality {
     event UserRegistered(
         address indexed _from
     );
-
-
-    function countConfigs(uint[] v) internal pure returns(uint) {
-        uint counter = 0;
-        for (uint i = 0; i < v.length; i++) {
-            if (v[i] % 2 != 0) {
-                counter++;
-            }
-        }
-
-        return counter;
-    }
-
-    function getStaticConfigs() public view returns(uint[], uint[]) {
-        uint[] memory v = new uint[](staticConfigs.length);
-        uint[] memory b = new uint[](staticConfigValues.length);
-        for (uint i = 0;i < staticConfigs.length; i++) {
-            v[i] = staticConfigs[i];
-            b[i] = staticConfigValues[i];
-        }
-
-        return (v, b);
-    }
 
     function onMatchStarting(bytes gameState) public returns(bytes) {
         return new bytes(0);

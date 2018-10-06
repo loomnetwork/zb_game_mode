@@ -22,4 +22,12 @@ contract('SerializationTestData', accounts => {
 
         assert.deepEqual(slice, [ 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 3, 0, 2, 1 ])
     })
+
+    it('Contract should serialize state change actions', async () => {
+        serializationTestData.address.should.not.be.null
+
+        const res = await serializationTestData.serializeGameStateChangeActions.call()
+
+        assert.ok(res.endsWith("080100000002070000000002060100000001050000000001"))
+    })
 })

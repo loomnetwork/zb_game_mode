@@ -38,9 +38,7 @@ contract ConquerMode is ZBGameMode  {
     }
 
     constructor() public {
-        //Define major attributes of the game
-        staticConfigs = [uint(StaticGameConfig.Health),uint(StaticGameConfig.Customdeck)];
-        staticConfigValues = [30,1];
+
     }
 
     //TODO take payment confirmation, with the ticketID and r,s,v

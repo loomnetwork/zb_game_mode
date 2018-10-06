@@ -37,13 +37,4 @@ contract('ExampleGame', accounts => {
         const res = await exampleGame.GameStart.call()
         res.toNumber().should.be.equal(3)
     })
-
-    it('Should Test dynamic arrays', async () => {
-        exampleGame.address.should.not.be.null
-
-        const res = await exampleGame.getOdds()
-        console.log("res-", res)
-        res['0'][0].toNumber().should.be.equal(1)
-    })
-
 })

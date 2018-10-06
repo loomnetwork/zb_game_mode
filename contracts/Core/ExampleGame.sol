@@ -16,37 +16,16 @@ contract ExampleGame is ZBGameMode  {
     }
 
     function GameStart() external pure returns (uint) {
-        return uint(ZBEnum.AbilityCall.Attack);
-    }
-
-    function countOdds(uint[] v) internal pure returns(uint) {
-        uint counter = 0;
-        for (uint i = 0; i < v.length; i++) {
-            if (v[i] % 2 != 0) {
-                counter++;
-            }
-        }
-
-        return counter;
-    }
-
-    function getOdds() public view returns(uint[], uint[]) {
-        uint[] memory v = new uint[](countOdds(values));
-        uint[] memory b = new uint[](countOdds(values));
-        uint counter = 0;
-        for (uint i = 0;i < values.length; i++) {
-            if (values[i] % 2 != 0) {
-                v[counter] = values[i];
-                b[counter] = 2;
-                counter++;
-            }
-        }
-
-        return (v, b);
-
+        return uint(ZBEnum.AbilityCallType.ATTACK);
     }
 
     function onMatchStarting(bytes gameState) public returns(bytes) {
-        return new bytes(0);
+        bytes memory buffer = new bytes(64);
+        uint offset = buffer.length;
+        offset = changePlayerDefense(buffer, offset, 0, 5);
+        offset = changePlayerDefense(buffer, offset, 1, 6);
+        offset = changePlayerGoo(buffer, offset, 0, 7);
+        offset = changePlayerGoo(buffer, offset, 1, 8);
+        return buffer;
     }
 }

@@ -47,13 +47,13 @@ contract('ConquerMode', accounts => {
         console.log("result userAcct ", name2)
         name2.should.be.equal(alice)
     })
-    
+
 
     function registerGameWithSign(){
 
     }
-    
-    //Req #0 Track matches, 
+
+    //Req #0 Track matches,
     //Req #4 Track matches, win 7 matches you get your gold back
     //Req #5 12 is max plays
     //Req #5 after 3 losses you are out
@@ -61,18 +61,18 @@ contract('ConquerMode', accounts => {
         const signers = accounts.slice(0, 3)
         signers.sort()
 
-    
+
         gameId = 1;
 
         ticketId = 123;
 
         //TODO need to verify this is the correct hash parameters
         const hash = soliditySha3("ticket", ticketId, gameId);
-        
+
         const sigV = []
         const sigR = []
         const sigS = []
-        
+
         for (let i = 0; i < signers.length; i++) {
             const sig = (await web3.eth.sign(hash, signers[i])).slice(2)
             const r = '0x' + sig.substring(0, 64)
@@ -121,7 +121,7 @@ contract('ConquerMode', accounts => {
         //see that Bob is removed from conquer mode
         const tx = await conquerMode.GameFinished(alice, james, 1)
 
-        //see that alice gets her coins back after 7 wins 
+        //see that alice gets her coins back after 7 wins
         assertEventVar(tx, 'AwardTokens', 'to', alice)
         assertEventVar(tx, 'AwardTokens', 'tokens', 25)
 
@@ -136,7 +136,7 @@ contract('ConquerMode', accounts => {
         await conquerMode.GameFinished(alice, greg, 1)
         const tx2 = await conquerMode.GameFinished(alice, greg, 1)
 
-        
+
         bobGame = await conquerMode.userGames.call(bob)
         bobGame.wins.toNumber().should.be.equal(1)
         bobGame.loses.toNumber().should.be.equal(3)
@@ -149,7 +149,7 @@ contract('ConquerMode', accounts => {
         aliceGame.wins.toNumber().should.be.equal(12)
         aliceGame.status.toNumber().should.be.equal(2) // Finished
 
-        //see that alice gets a card pack payout 
+        //see that alice gets a card pack payout
         assertEventVar(tx2, 'AwardPack', 'to', alice)
         assertEventVar(tx2, 'AwardPack', 'packCount', 1)
         assertEventVar(tx2, 'AwardPack', 'packType', 0)
@@ -157,23 +157,6 @@ contract('ConquerMode', accounts => {
         //Alice should be finished
         aliceGame = await conquerMode.userGames.call(alice)
         aliceGame.status.toNumber().should.be.equal(2)
-    })
-
-
-    //Override health to 30 
-    //Override desk to be custom deck
-    it('Should ConquerMode should set correct static overrides', async () => {
-       let res = await conquerMode.getStaticConfigs.call()
-       console.log("cfgs", res)
-       cfgs = res['0']
-       vals = res['1']
-       //health should be 30
-       cfgs[0].toNumber().should.be.equal(1)
-       vals[0].toNumber().should.be.equal(30)
-
-       //Randomize Deck
-       cfgs[1].toNumber().should.be.equal(2)
-       vals[1].toNumber().should.be.equal(1)
     })
 
     //TODO Req #2 pick random card 30 times
@@ -193,11 +176,11 @@ contract('ConquerMode', accounts => {
 
         //TODO need to verify this is the correct hash parameters
         const hash = soliditySha3("ticket", ticketId, gameId);
-      
+
           const sigV = []
           const sigR = []
           const sigS = []
-      
+
           for (let i = 0; i < signers.length; i++) {
             const sig = (await web3.eth.sign(hash, signers[i])).slice(2)
             const r = '0x' + sig.substring(0, 64)

@@ -6,7 +6,7 @@ pragma solidity ^0.4.16;
  * @author pouladzade@gmail.com
  */
 
-contract TypesToBytes {
+library TypesToBytes {
     function addressToBytes(uint _offst, address _input, bytes memory _output) internal pure {
 
         assembly {

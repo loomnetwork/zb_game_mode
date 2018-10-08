@@ -6,14 +6,14 @@ pragma solidity ^0.4.16;
  * @author pouladzade@gmail.com
  */
 
-contract  SizeOf {
-    
+library SizeOf {
+
     function sizeOfString(string _in) internal pure  returns(uint _size){
         _size = bytes(_in).length / 32;
-         if(bytes(_in).length % 32 != 0) 
+         if(bytes(_in).length % 32 != 0)
             _size++;
-            
-        _size++; // first 32 bytes is reserved for the size of the string     
+
+        _size++; // first 32 bytes is reserved for the size of the string
         _size *= 32;
     }
 
@@ -57,18 +57,18 @@ contract  SizeOf {
         }
 
     }
-    
+
     function sizeOfUint(uint16 _postfix) internal pure  returns(uint size){
         return sizeOfInt(_postfix);
     }
 
     function sizeOfAddress() internal pure  returns(uint8){
-        return 20; 
+        return 20;
     }
-    
+
     function sizeOfBool() internal pure  returns(uint8){
-        return 1; 
+        return 1;
     }
-    
+
 
 }

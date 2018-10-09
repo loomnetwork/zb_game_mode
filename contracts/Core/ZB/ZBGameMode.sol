@@ -6,8 +6,29 @@ import "./ZBEnum.sol";
 import "./../ZBGameModeSerialization.sol";
 
 contract ZBGameMode is ZBMode {
-    using ZBGameModeSerialization for ZBGameModeSerialization.GameStateSerializedChanges;
-    using ZBGameModeSerialization for ZBGameModeSerialization.GameState;
+    using ZBGameModeSerialization for ZBGameModeSerialization.SerializedGameStateChanges;
+    using ZBGameModeSerialization for GameState;
+
+    struct PlayerState {
+        uint8 defense;
+        uint8 goo;
+    }
+
+    struct GameState {
+        int64 id;
+        uint8 currentPlayerIndex;
+        PlayerState[] playerStates;
+    }
+
+    struct Vector2Int {
+        int32 x;
+        int32 y;
+    }
+
+    struct Rect {
+        Vector2Int position;
+        Vector2Int size;
+    }
 
     event MatchedStarted(
         address indexed _from
@@ -33,7 +54,11 @@ contract ZBGameMode is ZBMode {
         address indexed _from
     );
 
-    function onMatchStarting(bytes) public pure returns(bytes) {
+    function onMatchStarting(bytes) public pure returns (bytes) {
+        return new bytes(0);
+    }
+
+    function getCustomUi() public view returns (bytes) {
         return new bytes(0);
     }
 }

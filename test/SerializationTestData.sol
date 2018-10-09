@@ -2,14 +2,16 @@ pragma solidity ^0.4.24;
 
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
+import "../contracts/Core/ZB/ZBGameMode.sol";
 import "../contracts/Core/ZBGameModeSerialization.sol";
 import "../contracts/3rdParty/Seriality/BytesToTypes.sol";
 import "../contracts/3rdParty/Seriality/SizeOf.sol";
 import "../contracts/3rdParty/Seriality/TypesToBytes.sol";
 
 contract SerializationTestData {
-    using ZBGameModeSerialization for ZBGameModeSerialization.GameStateSerializedChanges;
-    using ZBGameModeSerialization for ZBGameModeSerialization.GameState;
+    using ZBGameModeSerialization for ZBGameModeSerialization.SerializedGameStateChanges;
+    using ZBGameModeSerialization for ZBGameModeSerialization.SerializedCustomUi;
+    using ZBGameModeSerialization for ZBGameMode.GameState;
 
     function serializeInts() public pure returns (bytes) {
         bytes memory buffer = new bytes(64);
@@ -25,13 +27,64 @@ contract SerializationTestData {
         return buffer;
     }
 
+    function serializeShortString() public pure returns (bytes) {
+        bytes memory buffer = new bytes(256);
+        uint offset = 256;
+        string memory text = "Cool Button";
+        TypesToBytes.stringToBytes(offset, bytes(text), buffer);
+        offset -= SizeOf.sizeOfString(text);
+        return buffer;
+    }
+
+    function serializeLongString() public pure returns (bytes) {
+        bytes memory buffer = new bytes(256);
+        uint offset = 256;
+        string memory text = "Cool Button 1 Cool Button 2 Cool Button 3 Cool Button 4 Cool Button 5 Cool Button 6 Cool Button 7 Cool Button 8 Cool Button 9 Cool Button 0";
+        TypesToBytes.stringToBytes(offset, bytes(text), buffer);
+        offset -= SizeOf.sizeOfString(text);
+        return buffer;
+    }
+
     function serializeGameStateChangeActions() public pure returns (bytes) {
-        ZBGameModeSerialization.GameStateSerializedChanges memory changes;
+        ZBGameModeSerialization.SerializedGameStateChanges memory changes;
         changes.init(64);
         changes.changePlayerDefense(0, 5);
         changes.changePlayerDefense(1, 6);
         changes.changePlayerGoo(0, 7);
         changes.changePlayerGoo(1, 8);
         return changes.getBytes();
+    }
+
+    function serializeCustomUi() public pure returns (bytes) {
+        ZBGameModeSerialization.SerializedCustomUi memory customUi;
+        customUi.init(256);
+        customUi.addLabel(
+            ZBGameMode.Rect({
+                position: ZBGameMode.Vector2Int ({
+                    x: 25,
+                    y: 230
+                }),
+                size: ZBGameMode.Vector2Int ({
+                    x: 200,
+                    y: 150
+                })
+            }),
+            "Some Very Cool text!"
+        );
+        customUi.addButton(
+            ZBGameMode.Rect({
+                position: ZBGameMode.Vector2Int ({
+                    x: 25,
+                    y: 30
+                }),
+                size: ZBGameMode.Vector2Int ({
+                    x: 200,
+                    y: 150
+                })
+            }),
+            "Click Me",
+            "someFunction"
+        );
+        return customUi.getBytes();
     }
 }

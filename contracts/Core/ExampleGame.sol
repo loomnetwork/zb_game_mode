@@ -2,6 +2,7 @@ pragma solidity 0.4.24;
 
 import "./ZB/ZBGameMode.sol";
 import "./ZB/ZBEnum.sol";
+import "./ZBGameModeSerialization.sol";
 
 // ExampleGameMode
 contract ExampleGame is ZBGameMode  {
@@ -19,13 +20,13 @@ contract ExampleGame is ZBGameMode  {
         return uint(ZBEnum.AbilityCallType.ATTACK);
     }
 
-    function onMatchStarting(bytes gameState) public returns(bytes) {
-        bytes memory buffer = new bytes(64);
-        uint offset = buffer.length;
-        offset = changePlayerDefense(buffer, offset, 0, 5);
-        offset = changePlayerDefense(buffer, offset, 1, 6);
-        offset = changePlayerGoo(buffer, offset, 0, 7);
-        offset = changePlayerGoo(buffer, offset, 1, 8);
-        return buffer;
+    function onMatchStarting(bytes) public pure returns(bytes) {
+        ZBGameModeSerialization.GameStateSerializedChanges memory changes;
+        changes.init(64);
+        changes.changePlayerDefense(0, 5);
+        changes.changePlayerDefense(1, 6);
+        changes.changePlayerGoo(0, 7);
+        changes.changePlayerGoo(1, 8);
+        return changes.getBytes();
     }
 }

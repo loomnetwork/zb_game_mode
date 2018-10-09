@@ -5,10 +5,10 @@ import "./../../Interfaces/ZBMode.sol";
 import "./ZBEnum.sol";
 import "./../ZBGameModeSerialization.sol";
 
-//import "openzeppelin-solidity/contracts/introspection/SupportsInterfaceWithLookup.sol";
+contract ZBGameMode is ZBMode {
+    using ZBGameModeSerialization for ZBGameModeSerialization.GameStateSerializedChanges;
+    using ZBGameModeSerialization for ZBGameModeSerialization.GameState;
 
-
-contract ZBGameMode is ZBMode, ZBEnum, ZBGameModeSerialization {
     event MatchedStarted(
         address indexed _from
     );
@@ -33,7 +33,7 @@ contract ZBGameMode is ZBMode, ZBEnum, ZBGameModeSerialization {
         address indexed _from
     );
 
-    function onMatchStarting(bytes gameState) public returns(bytes) {
+    function onMatchStarting(bytes) public pure returns(bytes) {
         return new bytes(0);
     }
 }

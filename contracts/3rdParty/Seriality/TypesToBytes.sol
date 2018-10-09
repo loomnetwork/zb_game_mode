@@ -6,7 +6,7 @@ pragma solidity ^0.4.16;
  * @author pouladzade@gmail.com
  */
 
-contract TypesToBytes {
+library TypesToBytes {
     function addressToBytes(uint _offst, address _input, bytes memory _output) internal pure {
 
         assembly {
@@ -29,19 +29,17 @@ contract TypesToBytes {
         }
     }
 
-    function stringToBytes(uint _offst, bytes memory _input, bytes memory _output) internal {
+    function stringToBytes(uint _offst, bytes memory _input, bytes memory _output) internal pure {
         uint256 stack_size = _input.length / 32;
         if(_input.length % 32 > 0) stack_size++;
 
         assembly {
-            let index := 0
             stack_size := add(stack_size,1)//adding because of 32 first bytes memory as the length
-        loop:
 
-            mstore(add(_output, _offst), mload(add(_input,mul(index,32))))
-            _offst := sub(_offst , 32)
-            index := add(index ,1)
-            jumpi(loop , lt(index,stack_size))
+            for { let index := 0 } lt(index, stack_size) { index := add(index, 1) } {
+                mstore(add(_output, _offst), mload(add(_input,mul(index,32))))
+                _offst := sub(_offst , 32)
+            }
         }
     }
 

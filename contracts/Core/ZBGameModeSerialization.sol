@@ -1,28 +1,25 @@
 pragma solidity ^0.4.24;
 
 import "./ZB/ZBEnum.sol";
+import "./ZB/ZBGameMode.sol";
 import "./../3rdParty/Seriality/BytesToTypes.sol";
 import "./../3rdParty/Seriality/SizeOf.sol";
 import "./../3rdParty/Seriality/TypesToBytes.sol";
 
 library ZBGameModeSerialization {
-    struct PlayerState {
-        uint8 defense;
-        uint8 goo;
-    }
-
-    struct GameState {
-        int64 id;
-        uint8 currentPlayerIndex;
-        PlayerState[] playerStates;
-    }
-
-    struct GameStateSerializedChanges {
+    struct SerializedGameStateChanges {
         bytes buffer;
         uint offset;
     }
 
-    function initWithSerializedData(GameState memory self, bytes serializedGameState) internal pure {
+    struct SerializedCustomUi {
+        bytes buffer;
+        uint offset;
+    }
+
+    // GameState
+
+    function initWithSerializedData(ZBGameMode.GameState memory self, bytes serializedGameState) internal pure {
         uint offset = serializedGameState.length;
 
         self.id = BytesToTypes.bytesToInt64(offset, serializedGameState);
@@ -31,7 +28,7 @@ library ZBGameModeSerialization {
         self.currentPlayerIndex = BytesToTypes.bytesToUint8(offset, serializedGameState);
         offset -= SizeOf.sizeOfInt(8);
 
-        self.playerStates = new PlayerState[](2);
+        self.playerStates = new ZBGameMode.PlayerState[](2);
         for (uint i = 0; i < self.playerStates.length; i++) {
             self.playerStates[i].defense = BytesToTypes.bytesToUint8(offset, serializedGameState);
             offset -= SizeOf.sizeOfInt(8);
@@ -41,17 +38,19 @@ library ZBGameModeSerialization {
         }
     }
 
-    function getBytes(GameStateSerializedChanges memory self) internal pure returns (bytes) {
-        return self.buffer;
-    }
+    // SerializedGameStateChanges
 
-    function init(GameStateSerializedChanges memory self, uint bufferSize) internal pure {
+    function init(SerializedGameStateChanges memory self, uint bufferSize) internal pure {
         self.buffer = new bytes(bufferSize);
         self.offset = bufferSize;
     }
 
-    function changePlayerDefense(GameStateSerializedChanges memory self, uint8 playerIndex, uint8 defense) internal pure returns (uint) {
-        serializeStateGameStateChangeAction(self, ZBEnum.GameStateChangeAction.SetPlayerDefense);
+    function getBytes(SerializedGameStateChanges memory self) internal pure returns (bytes) {
+        return self.buffer;
+    }
+
+    function changePlayerDefense(SerializedGameStateChanges memory self, uint8 playerIndex, uint8 defense) internal pure returns (uint) {
+        serializeStartGameStateChangeAction(self, ZBEnum.GameStateChangeAction.SetPlayerDefense);
 
         TypesToBytes.intToBytes(self.offset, playerIndex, self.buffer);
         self.offset -= SizeOf.sizeOfInt(8);
@@ -60,8 +59,8 @@ library ZBGameModeSerialization {
         self.offset -= SizeOf.sizeOfInt(8);
     }
 
-    function changePlayerGoo(GameStateSerializedChanges memory self, uint8 playerIndex, uint8 goo) internal pure {
-        serializeStateGameStateChangeAction(self, ZBEnum.GameStateChangeAction.SetPlayerGoo);
+    function changePlayerGoo(SerializedGameStateChanges memory self, uint8 playerIndex, uint8 goo) internal pure {
+        serializeStartGameStateChangeAction(self, ZBEnum.GameStateChangeAction.SetPlayerGoo);
 
         TypesToBytes.intToBytes(self.offset, playerIndex, self.buffer);
         self.offset -= SizeOf.sizeOfInt(8);
@@ -70,8 +69,65 @@ library ZBGameModeSerialization {
         self.offset -= SizeOf.sizeOfInt(8);
     }
 
-    function serializeStateGameStateChangeAction(GameStateSerializedChanges memory self, ZBEnum.GameStateChangeAction action) private pure {
+    function serializeStartGameStateChangeAction(SerializedGameStateChanges memory self, ZBEnum.GameStateChangeAction action) private pure {
         TypesToBytes.intToBytes(self.offset, uint32(action), self.buffer);
         self.offset -= SizeOf.sizeOfInt(32);
+    }
+
+    // SerializedCustomUi
+
+    function init(SerializedCustomUi memory self, uint bufferSize) internal pure {
+        self.buffer = new bytes(bufferSize);
+        self.offset = bufferSize;
+    }
+
+    function getBytes(SerializedCustomUi memory self) internal pure returns (bytes) {
+        return self.buffer;
+    }
+
+    function addLabel(SerializedCustomUi memory self, ZBGameMode.Rect rect, string text) internal pure {
+        serializeStartCustomUiElement(self, ZBEnum.CustomUiElement.Label, rect);
+
+        TypesToBytes.stringToBytes(self.offset, bytes(text), self.buffer);
+        self.offset -= SizeOf.sizeOfString(text);
+    }
+
+    function addButton(SerializedCustomUi memory self, ZBGameMode.Rect rect, string title, string onClickFunctionName) internal pure {
+        serializeStartCustomUiElement(self, ZBEnum.CustomUiElement.Button, rect);
+
+        TypesToBytes.stringToBytes(self.offset, bytes(title), self.buffer);
+        self.offset -= SizeOf.sizeOfString(title);
+
+        TypesToBytes.stringToBytes(self.offset, bytes(onClickFunctionName), self.buffer);
+        self.offset -= SizeOf.sizeOfString(onClickFunctionName);
+    }
+
+    function serializeStartCustomUiElement(SerializedCustomUi memory self, ZBEnum.CustomUiElement element) private pure {
+        TypesToBytes.intToBytes(self.offset, uint32(element), self.buffer);
+        self.offset -= SizeOf.sizeOfInt(32);
+    }
+
+    function serializeStartCustomUiElement(SerializedCustomUi memory self, ZBEnum.CustomUiElement element, ZBGameMode.Rect rect) private pure {
+        serializeStartCustomUiElement(self, element);
+        self.offset = serializeRect(self.buffer, self.offset, rect);
+    }
+
+    function serializeRect(bytes buffer, uint offset, ZBGameMode.Rect rect) private pure returns (uint) {
+        uint newOffset = offset;
+        newOffset = serializeVector2Int(buffer, newOffset, rect.position);
+        newOffset = serializeVector2Int(buffer, newOffset, rect.size);
+        return newOffset;
+    }
+
+    function serializeVector2Int(bytes buffer, uint offset, ZBGameMode.Vector2Int v) private pure returns (uint) {
+        uint newOffset = offset;
+
+        TypesToBytes.intToBytes(newOffset, v.x, buffer);
+        newOffset -= SizeOf.sizeOfInt(32);
+
+        TypesToBytes.intToBytes(newOffset, v.y, buffer);
+        newOffset -= SizeOf.sizeOfInt(32);
+
+        return newOffset;
     }
 }

@@ -4,13 +4,13 @@
 pragma solidity ^0.4.24;
 
 library ZBEnum {
-    
+
     enum AbilityActivityType
     {
             PASSIVE,
             ACTIVE
     }
-    
+
     enum AbilityCallType
     {
             TURN,
@@ -23,7 +23,7 @@ library ZBEnum {
             AT_DEFENCE,
             IN_HAND
     }
-    
+
     enum PlayerAction
     {
             StartGame,
@@ -33,12 +33,19 @@ library ZBEnum {
             CardAttack,
             UseCardAbility
     }
-    
+
     enum GameStateChangeAction
     {
             None,
             SetPlayerDefense,
             SetPlayerGoo
     }
-    
+
+    enum CustomUiElement
+    {
+            None,
+            Label,
+            Button
+    }
+
 }

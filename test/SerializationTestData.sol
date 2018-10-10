@@ -55,10 +55,25 @@ contract SerializationTestData {
         return changes.getBytes();
     }
 
+    function serializeGameStateChangePlayerDeckCards() public pure returns (bytes) {
+        ZBGameMode.CollectionCard[] memory cards = new ZBGameMode.CollectionCard[](2);
+        cards[0].name = "Zhampion";
+        cards[0].amount = 3;
+        cards[1].name = "Germs";
+        cards[1].amount = 4;
+
+        ZBGameModeSerialization.SerializedGameStateChanges memory changes;
+        changes.init(512);
+
+        changes.changePlayerDeckCards(0, cards);
+        changes.changePlayerDeckCards(1, cards);
+        return changes.getBytes();
+    }
+
     function serializeCustomUi() public pure returns (bytes) {
         ZBGameModeSerialization.SerializedCustomUi memory customUi;
         customUi.init(256);
-        customUi.addLabel(
+        customUi.label(
             ZBGameMode.Rect({
                 position: ZBGameMode.Vector2Int ({
                     x: 25,
@@ -71,7 +86,7 @@ contract SerializationTestData {
             }),
             "Some Very Cool text!"
         );
-        customUi.addButton(
+        customUi.button(
             ZBGameMode.Rect({
                 position: ZBGameMode.Vector2Int ({
                     x: 25,

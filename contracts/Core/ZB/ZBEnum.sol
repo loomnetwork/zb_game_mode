@@ -38,7 +38,8 @@ library ZBEnum {
     {
             None,
             SetPlayerDefense,
-            SetPlayerGoo
+            SetPlayerGoo,
+            SetPlayerDeckCards
     }
 
     enum CustomUiElement

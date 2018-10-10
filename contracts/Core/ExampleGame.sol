@@ -26,58 +26,84 @@ contract ExampleGame is ZBGameMode  {
         return uint(ZBEnum.AbilityCallType.ATTACK);
     }
 
-    function onMatchStarting(bytes) public pure returns(bytes) {
+    function onMatchStarting(bytes serializedGameState) public pure returns(bytes) {
+        GameState memory gameState;
+        gameState.initWithSerializedData(serializedGameState);
+
         ZBGameModeSerialization.SerializedGameStateChanges memory changes;
-        changes.init(64);
+        changes.init(8192);
         changes.changePlayerDefense(0, 5);
         changes.changePlayerDefense(1, 6);
         changes.changePlayerGoo(0, 7);
         changes.changePlayerGoo(1, 8);
+
+        for (uint i = 0; i < gameState.playerStates.length; i++) {
+            for (uint j = 0; j < gameState.playerStates[i].deck.cards.length; j++) {
+                //gameState.playerStates[i].deck.cards[j].name = "Zhampion";
+            }
+        }
+
+        //changes.changePlayerDeckCards(0, gameState.playerStates[0].deck.cards);
+        //changes.changePlayerDeckCards(1, gameState.playerStates[1].deck.cards);
+
         return changes.getBytes();
     }
 
     function getCustomUi() public view returns (bytes) {
         ZBGameModeSerialization.SerializedCustomUi memory customUi;
         customUi.init(1024);
-        customUi.addLabel(
+        customUi.label(
             ZBGameMode.Rect({
                 position: ZBGameMode.Vector2Int ({
                     x: 25,
-                    y: 230
+                    y: 300
                 }),
                 size: ZBGameMode.Vector2Int ({
-                    x: 200,
+                    x: 300,
                     y: 150
                 })
             }),
-            "Some Very Cool text!"
+            "Counter Value: "
         );
-        customUi.addButton(
+        customUi.label(
+            ZBGameMode.Rect({
+                position: ZBGameMode.Vector2Int ({
+                    x: 325,
+                    y: 300
+                }),
+                size: ZBGameMode.Vector2Int ({
+                    x: 300,
+                    y: 150
+                })
+            }),
+            uint2str(counter)
+        );
+        customUi.button(
             ZBGameMode.Rect({
                 position: ZBGameMode.Vector2Int ({
                     x: 25,
                     y: 30
                 }),
                 size: ZBGameMode.Vector2Int ({
-                    x: 200,
-                    y: 150
+                    x: 500,
+                    y: 200
                 })
             }),
             "Click Me",
             "someFunction"
         );
-        customUi.addButton(
+        customUi.button(
             ZBGameMode.Rect({
                 position: ZBGameMode.Vector2Int ({
-                    x: 300,
+                    x: 620,
                     y: 30
                 }),
                 size: ZBGameMode.Vector2Int ({
-                    x: 200,
-                    y: 150
+                    x: 300,
+                    y: 200
                 })
             }),
-            uint2str(counter),
+            "+1",
             "incrementCounter"
         );
         return customUi.getBytes();

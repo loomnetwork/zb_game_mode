@@ -12,6 +12,19 @@ contract ZBGameMode is ZBMode {
     struct PlayerState {
         uint8 defense;
         uint8 goo;
+        Deck deck;
+    }
+
+    struct Deck {
+        int64 id;
+        string name;
+        int64 heroId;
+        CollectionCard[] cards;
+    }
+
+    struct CollectionCard {
+        string name;
+        int64 amount;
     }
 
     struct GameState {

@@ -26,6 +26,10 @@ contract ExampleGame is ZBGameMode  {
         return uint(ZBEnum.AbilityCallType.ATTACK);
     }
 
+    function triggerMemoryLeak() public pure returns(bytes) {
+        return new bytes(25000);
+    }
+
     function onMatchStarting(bytes serializedGameState) public pure returns(bytes) {
         GameState memory gameState;
         gameState.initWithSerializedData(serializedGameState);

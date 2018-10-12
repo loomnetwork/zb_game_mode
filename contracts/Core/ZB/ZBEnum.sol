@@ -38,7 +38,8 @@ library ZBEnum {
     {
             None,
             SetPlayerDefense,
-            SetPlayerGoo,
+            SetPlayerCurrentGoo,
+            SetPlayerGooVials,
             SetPlayerDeckCards
     }
 

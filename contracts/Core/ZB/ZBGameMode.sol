@@ -11,7 +11,8 @@ contract ZBGameMode is ZBMode {
 
     struct PlayerState {
         uint8 defense;
-        uint8 goo;
+        uint8 currentGoo;
+        uint8 gooVials;
         Deck deck;
     }
 

@@ -38,17 +38,19 @@ contract ExampleGame is ZBGameMode  {
         changes.init(8192);
         changes.changePlayerDefense(0, 5);
         changes.changePlayerDefense(1, 6);
-        changes.changePlayerGoo(0, 7);
-        changes.changePlayerGoo(1, 8);
+        changes.changePlayerGooVials(0, 5);
+        changes.changePlayerGooVials(1, 8);
+        changes.changePlayerCurrentGoo(0, 2);
+        changes.changePlayerCurrentGoo(1, 6);
 
         for (uint i = 0; i < gameState.playerStates.length; i++) {
             for (uint j = 0; j < gameState.playerStates[i].deck.cards.length; j++) {
-                //gameState.playerStates[i].deck.cards[j].name = "Zhampion";
+                gameState.playerStates[i].deck.cards[j].name = "Zhampion";
             }
         }
 
-        //changes.changePlayerDeckCards(0, gameState.playerStates[0].deck.cards);
-        //changes.changePlayerDeckCards(1, gameState.playerStates[1].deck.cards);
+        changes.changePlayerDeckCards(0, gameState.playerStates[0].deck.cards);
+        changes.changePlayerDeckCards(1, gameState.playerStates[1].deck.cards);
 
         return changes.getBytes();
     }

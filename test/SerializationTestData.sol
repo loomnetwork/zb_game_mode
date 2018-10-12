@@ -47,11 +47,13 @@ contract SerializationTestData {
 
     function serializeGameStateChangeActions() public pure returns (bytes) {
         ZBGameModeSerialization.SerializedGameStateChanges memory changes;
-        changes.init(64);
+        changes.init(96);
         changes.changePlayerDefense(0, 5);
         changes.changePlayerDefense(1, 6);
-        changes.changePlayerGoo(0, 7);
-        changes.changePlayerGoo(1, 8);
+        changes.changePlayerGooVials(0, 5);
+        changes.changePlayerGooVials(1, 8);
+        changes.changePlayerCurrentGoo(0, 2);
+        changes.changePlayerCurrentGoo(1, 6);
         return changes.getBytes();
     }
 

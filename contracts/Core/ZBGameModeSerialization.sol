@@ -35,7 +35,10 @@ library ZBGameModeSerialization {
             self.playerStates[i].defense = BytesToTypes.bytesToUint8(offset, serializedGameState);
             offset -= SizeOf.sizeOfInt(8);
 
-            self.playerStates[i].goo = BytesToTypes.bytesToUint8(offset, serializedGameState);
+            self.playerStates[i].currentGoo = BytesToTypes.bytesToUint8(offset, serializedGameState);
+            offset -= SizeOf.sizeOfInt(8);
+
+            self.playerStates[i].gooVials = BytesToTypes.bytesToUint8(offset, serializedGameState);
             offset -= SizeOf.sizeOfInt(8);
 
             // Deck
@@ -93,13 +96,23 @@ library ZBGameModeSerialization {
         self.offset -= SizeOf.sizeOfInt(8);
     }
 
-    function changePlayerGoo(SerializedGameStateChanges memory self, uint8 playerIndex, uint8 goo) internal pure {
-        serializeStartGameStateChangeAction(self, ZBEnum.GameStateChangeAction.SetPlayerGoo);
+    function changePlayerCurrentGoo(SerializedGameStateChanges memory self, uint8 playerIndex, uint8 currentGoo) internal pure {
+        serializeStartGameStateChangeAction(self, ZBEnum.GameStateChangeAction.SetPlayerCurrentGoo);
 
         TypesToBytes.intToBytes(self.offset, playerIndex, self.buffer);
         self.offset -= SizeOf.sizeOfInt(8);
 
-        TypesToBytes.intToBytes(self.offset, goo, self.buffer);
+        TypesToBytes.intToBytes(self.offset, currentGoo, self.buffer);
+        self.offset -= SizeOf.sizeOfInt(8);
+    }
+
+    function changePlayerGooVials(SerializedGameStateChanges memory self, uint8 playerIndex, uint8 gooVials) internal pure {
+        serializeStartGameStateChangeAction(self, ZBEnum.GameStateChangeAction.SetPlayerGooVials);
+
+        TypesToBytes.intToBytes(self.offset, playerIndex, self.buffer);
+        self.offset -= SizeOf.sizeOfInt(8);
+
+        TypesToBytes.intToBytes(self.offset, gooVials, self.buffer);
         self.offset -= SizeOf.sizeOfInt(8);
     }
 

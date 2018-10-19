@@ -16,7 +16,7 @@ const ZBEnum = artifacts.require('ZBEnum')
 contract('ExampleGame', accounts => {
     let exampleGame
     let zenum
-    const  [ alice, bob, carlos ] = accounts;
+    const [ alice, bob, carlos ] = accounts;
 
     beforeEach(async () => {
         exampleGame = await ExampleGame.new()
@@ -28,13 +28,5 @@ contract('ExampleGame', accounts => {
 
         const name = await exampleGame.name.call()
         name.should.be.equal('ExampleGame')
-    })
-
-
-    it('Should Have Enums setup', async () => {
-        exampleGame.address.should.not.be.null
-
-        const res = await exampleGame.GameStart.call()
-        res.toNumber().should.be.equal(3)
     })
 })

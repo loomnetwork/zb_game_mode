@@ -1,31 +1,54 @@
 pragma solidity ^0.4.24;
 
-import "./../../Interfaces/ZBMode.sol";
 //import "./../../Interfaces/ERC721XReceiver.sol";
 import "./ZBEnum.sol";
 import "./../ZBGameModeSerialization.sol";
 
-contract ZBGameMode is ZBMode {
+contract ZBGameMode {
     using ZBGameModeSerialization for ZBGameModeSerialization.SerializedGameStateChanges;
     using ZBGameModeSerialization for GameState;
 
+    enum Player {
+        Player1,
+        Player2
+    }
+
     struct PlayerState {
+        string id;
+        //PlayerActionType currentAction = 2;
+        //OverlordInstance overlordInstance = 3;
+        CardInstance[] cardsInHand;
+        //CardInstance[] CardsInPlay;
+        CardInstance[] cardsInDeck;
+        Deck deck;
         uint8 defense;
         uint8 currentGoo;
         uint8 gooVials;
-        Deck deck;
+        //bool hasDrawnCard = 11;
+        //repeated CardInstance cardsInGraveyard = 12;
+        uint8 initialCardsInHandCount;
+        uint8 maxCardsInPlay;
+        uint8 maxCardsInHand;
+        uint8 maxGooVials;
     }
 
     struct Deck {
         int64 id;
         string name;
         int64 heroId;
-        CollectionCard[] cards;
     }
 
-    struct CollectionCard {
+    struct CardPrototype {
         string name;
-        int64 amount;
+        uint8 gooCost;
+    }
+
+    struct CardInstance {
+        int32 instanceId;
+        CardPrototype prototype;
+        int32 defense;
+        int32 attack;
+        string owner;
     }
 
     struct GameState {
@@ -42,6 +65,17 @@ contract ZBGameMode is ZBMode {
     struct Rect {
         Vector2Int position;
         Vector2Int size;
+    }
+
+    struct CustomUiLabel {
+        Rect rect;
+        string text;
+    }
+
+    struct CustomUiButton {
+        Rect rect;
+        string title;
+        bytes onClickCallData;
     }
 
     event MatchedStarted(
@@ -68,7 +102,13 @@ contract ZBGameMode is ZBMode {
         address indexed _from
     );
 
-    function onMatchStarting(bytes) public pure returns (bytes) {
+    function name() public view returns (string);
+
+    function onMatchStartingBeforeInitialDraw(bytes) public pure returns (bytes) {
+        return new bytes(0);
+    }
+
+    function onMatchStartingAfterInitialDraw(bytes) external pure returns (bytes) {
         return new bytes(0);
     }
 

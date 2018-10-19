@@ -10,113 +10,130 @@ contract ExampleGame is ZBGameMode  {
     using ZBGameModeSerialization for ZBGameModeSerialization.SerializedCustomUi;
     using ZBGameModeSerialization for ZBGameMode.GameState;
 
-    uint[] values;
-
     uint counter = 0;
 
-    function name() external view returns (string) {
+    function name() public view returns (string) {
         return  "ExampleGame";
     }
 
-    constructor() public {
-        values = [1,2,3,4,5,6];
+    function onMatchStartingBeforeInitialDraw(bytes) public pure returns (bytes) {
+        ZBGameModeSerialization.SerializedGameStateChanges memory changes;
+        changes.init(2 ** 15);
+        changes.changePlayerInitialCardsInHandCount(Player.Player1, 2);
+        changes.changePlayerInitialCardsInHandCount(Player.Player2, 2);
+
+        return changes.getBytes();
     }
 
-    function GameStart() external pure returns (uint) {
-        return uint(ZBEnum.AbilityCallType.ATTACK);
-    }
-
-    function triggerMemoryLeak() public pure returns(bytes) {
-        return new bytes(25000);
-    }
-
-    function onMatchStarting(bytes serializedGameState) public pure returns(bytes) {
+    function onMatchStartingAfterInitialDraw(bytes serializedGameState) external pure returns(bytes) {
         GameState memory gameState;
         gameState.initWithSerializedData(serializedGameState);
 
         ZBGameModeSerialization.SerializedGameStateChanges memory changes;
-        changes.init(8192);
-        changes.changePlayerDefense(0, 5);
-        changes.changePlayerDefense(1, 6);
-        changes.changePlayerGooVials(0, 5);
-        changes.changePlayerGooVials(1, 8);
-        changes.changePlayerCurrentGoo(0, 2);
-        changes.changePlayerCurrentGoo(1, 6);
+        changes.init(2 ** 15);
+
+        changes.changePlayerDefense(Player.Player1, 5);
+        changes.changePlayerDefense(Player.Player2, 6);
+        changes.changePlayerGooVials(Player.Player1, 5);
+        changes.changePlayerGooVials(Player.Player2, 8);
+        changes.changePlayerCurrentGoo(Player.Player1, 2);
+        changes.changePlayerCurrentGoo(Player.Player2, 6);
+        changes.changePlayerMaxGooVials(Player.Player1, 2);
+        changes.changePlayerMaxGooVials(Player.Player2, 2);
 
         for (uint i = 0; i < gameState.playerStates.length; i++) {
-            for (uint j = 0; j < gameState.playerStates[i].deck.cards.length; j++) {
-                gameState.playerStates[i].deck.cards[j].name = "Zhampion";
+            for (uint j = 0; j < gameState.playerStates[i].cardsInHand.length; j++) {
+                gameState.playerStates[i].cardsInHand[j].prototype.name = "Zhampion";
+            }
+
+            for (j = 0; j < gameState.playerStates[i].cardsInDeck.length; j++) {
+                gameState.playerStates[i].cardsInDeck[j].prototype.name = "Pyromaz";
             }
         }
 
-        changes.changePlayerDeckCards(0, gameState.playerStates[0].deck.cards);
-        changes.changePlayerDeckCards(1, gameState.playerStates[1].deck.cards);
+        changes.changePlayerCardsInHand(Player.Player1, gameState.playerStates[0].cardsInHand);
+        changes.changePlayerCardsInHand(Player.Player2, gameState.playerStates[1].cardsInHand);
+        changes.changePlayerCardsInDeck(Player.Player1, gameState.playerStates[0].cardsInDeck);
+        changes.changePlayerCardsInDeck(Player.Player2, gameState.playerStates[1].cardsInDeck);
 
         return changes.getBytes();
     }
 
     function getCustomUi() public view returns (bytes) {
         ZBGameModeSerialization.SerializedCustomUi memory customUi;
-        customUi.init(1024);
-        customUi.label(
-            ZBGameMode.Rect({
-                position: ZBGameMode.Vector2Int ({
-                    x: 25,
-                    y: 300
+        customUi.init();
+        customUi.add(
+            ZBGameMode.CustomUiLabel({
+                rect: ZBGameMode.Rect({
+                    position: ZBGameMode.Vector2Int ({
+                        x: 25,
+                        y: 300
+                    }),
+                    size: ZBGameMode.Vector2Int ({
+                        x: 300,
+                        y: 150
+                    })
                 }),
-                size: ZBGameMode.Vector2Int ({
-                    x: 300,
-                    y: 150
-                })
-            }),
-            "Counter Value: "
+                text: "Counter Value: "
+            })
         );
-        customUi.label(
-            ZBGameMode.Rect({
-                position: ZBGameMode.Vector2Int ({
-                    x: 325,
-                    y: 300
+        customUi.add(
+            ZBGameMode.CustomUiLabel({
+                rect: ZBGameMode.Rect({
+                    position: ZBGameMode.Vector2Int ({
+                        x: 325,
+                        y: 300
+                    }),
+                    size: ZBGameMode.Vector2Int ({
+                        x: 300,
+                        y: 150
+                    })
                 }),
-                size: ZBGameMode.Vector2Int ({
-                    x: 300,
-                    y: 150
-                })
-            }),
-            uint2str(counter)
+                text: uint2str(counter)
+            })
         );
-        customUi.button(
-            ZBGameMode.Rect({
-                position: ZBGameMode.Vector2Int ({
-                    x: 25,
-                    y: 30
+        customUi.add(
+            ZBGameMode.CustomUiButton({
+                rect: ZBGameMode.Rect({
+                    position: ZBGameMode.Vector2Int ({
+                        x: 325,
+                        y: 30
+                    }),
+                    size: ZBGameMode.Vector2Int ({
+                        x: 300,
+                        y: 150
+                    })
                 }),
-                size: ZBGameMode.Vector2Int ({
-                    x: 500,
-                    y: 200
-                })
-            }),
-            "Click Me",
-            "someFunction"
+                title: "+1",
+                onClickCallData: abi.encodeWithSignature("incrementCounter()")
+            })
         );
-        customUi.button(
-            ZBGameMode.Rect({
-                position: ZBGameMode.Vector2Int ({
-                    x: 620,
-                    y: 30
+        customUi.add(
+            ZBGameMode.CustomUiButton({
+                rect: ZBGameMode.Rect({
+                    position: ZBGameMode.Vector2Int ({
+                        x: 675,
+                        y: 30
+                    }),
+                    size: ZBGameMode.Vector2Int ({
+                        x: 300,
+                        y: 150
+                    })
                 }),
-                size: ZBGameMode.Vector2Int ({
-                    x: 300,
-                    y: 200
-                })
-            }),
-            "+1",
-            "incrementCounter"
+                title: "+3",
+                onClickCallData: abi.encodeWithSignature("incrementCounter(int32)", int32(3))
+            })
         );
+
         return customUi.getBytes();
     }
 
     function incrementCounter() public {
         counter++;
+    }
+
+    function incrementCounter(int32 val) public {
+        counter += uint(val);
     }
 
     function uint2str(uint val) internal pure returns (string) {

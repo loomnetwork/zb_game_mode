@@ -48,59 +48,76 @@ contract SerializationTestData {
     function serializeGameStateChangeActions() public pure returns (bytes) {
         ZBGameModeSerialization.SerializedGameStateChanges memory changes;
         changes.init(96);
-        changes.changePlayerDefense(0, 5);
-        changes.changePlayerDefense(1, 6);
-        changes.changePlayerGooVials(0, 5);
-        changes.changePlayerGooVials(1, 8);
-        changes.changePlayerCurrentGoo(0, 2);
-        changes.changePlayerCurrentGoo(1, 6);
+        changes.changePlayerDefense(ZBGameMode.Player.Player1, 5);
+        changes.changePlayerDefense(ZBGameMode.Player.Player2, 6);
+        changes.changePlayerGooVials(ZBGameMode.Player.Player1, 5);
+        changes.changePlayerGooVials(ZBGameMode.Player.Player2, 8);
+        changes.changePlayerCurrentGoo(ZBGameMode.Player.Player1, 2);
+        changes.changePlayerCurrentGoo(ZBGameMode.Player.Player2, 6);
         return changes.getBytes();
     }
 
-    function serializeGameStateChangePlayerDeckCards() public pure returns (bytes) {
-        ZBGameMode.CollectionCard[] memory cards = new ZBGameMode.CollectionCard[](2);
-        cards[0].name = "Zhampion";
-        cards[0].amount = 3;
-        cards[1].name = "Germs";
-        cards[1].amount = 4;
+    function serializeGameStateChangePlayerCardsInHand() public pure returns (bytes) {
+        ZBGameMode.CardInstance[] memory cards = new ZBGameMode.CardInstance[](2);
+        cards[0].instanceId = 2;
+        cards[0].prototype = ZBGameMode.CardPrototype({
+            name: "Zhampion",
+            gooCost: 5
+        });
+        cards[0].defense = 4;
+        cards[0].attack = 5;
+        cards[0].owner = "Player1";
+        cards[0].instanceId = 3;
+        cards[0].prototype = ZBGameMode.CardPrototype({
+            name: "Firemaw",
+            gooCost: 4
+        });
+        cards[0].defense = 6;
+        cards[0].attack = 7;
+        cards[0].owner = "Player2";
 
         ZBGameModeSerialization.SerializedGameStateChanges memory changes;
         changes.init(512);
 
-        changes.changePlayerDeckCards(0, cards);
-        changes.changePlayerDeckCards(1, cards);
+        changes.changePlayerCardsInHand(ZBGameMode.Player.Player1, cards);
+        changes.changePlayerCardsInHand(ZBGameMode.Player.Player2, cards);
         return changes.getBytes();
     }
 
     function serializeCustomUi() public pure returns (bytes) {
         ZBGameModeSerialization.SerializedCustomUi memory customUi;
         customUi.init(256);
-        customUi.label(
-            ZBGameMode.Rect({
-                position: ZBGameMode.Vector2Int ({
-                    x: 25,
-                    y: 230
+        customUi.add(
+            ZBGameMode.CustomUiLabel({
+                rect: ZBGameMode.Rect({
+                    position: ZBGameMode.Vector2Int ({
+                        x: 25,
+                        y: 230
+                    }),
+                    size: ZBGameMode.Vector2Int ({
+                        x: 200,
+                        y: 150
+                    })
                 }),
-                size: ZBGameMode.Vector2Int ({
-                    x: 200,
-                    y: 150
-                })
-            }),
-            "Some Very Cool text!"
+                text: "Some Very Cool text!"
+            })
         );
-        customUi.button(
-            ZBGameMode.Rect({
-                position: ZBGameMode.Vector2Int ({
-                    x: 25,
-                    y: 30
+
+        customUi.add(
+            ZBGameMode.CustomUiButton({
+                rect: ZBGameMode.Rect({
+                    position: ZBGameMode.Vector2Int ({
+                        x: 675,
+                        y: 300
+                    }),
+                    size: ZBGameMode.Vector2Int ({
+                        x: 300,
+                        y: 150
+                    })
                 }),
-                size: ZBGameMode.Vector2Int ({
-                    x: 200,
-                    y: 150
-                })
-            }),
-            "Click Me",
-            "someFunction"
+                title: "Click Me",
+                onClickCallData: new bytes(0)
+            })
         );
         return customUi.getBytes();
     }

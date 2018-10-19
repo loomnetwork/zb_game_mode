@@ -40,7 +40,12 @@ library ZBEnum {
             SetPlayerDefense,
             SetPlayerCurrentGoo,
             SetPlayerGooVials,
-            SetPlayerDeckCards
+            SetPlayerCardsInDeck,
+            SetPlayerCardsInHand,
+            SetPlayerInitialCardsInHandCount,
+            SetPlayerMaxCardsInPlay,
+            SetPlayerMaxCardsInHand,
+            SetPlayerMaxGooVials
     }
 
     enum CustomUiElement

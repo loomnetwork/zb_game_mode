@@ -7,176 +7,333 @@ import "./../3rdParty/Seriality/SizeOf.sol";
 import "./../3rdParty/Seriality/TypesToBytes.sol";
 
 library ZBGameModeSerialization {
-    struct SerializedGameStateChanges {
+    struct SerializationBuffer {
         bytes buffer;
         uint offset;
+    }
+
+    struct SerializedGameStateChanges {
+        SerializationBuffer buffer;
     }
 
     struct SerializedCustomUi {
-        bytes buffer;
-        uint offset;
+        SerializationBuffer buffer;
     }
 
-    // GameState
+    // GameState deserialization
 
     function initWithSerializedData(ZBGameMode.GameState memory self, bytes serializedGameState) internal pure {
-        uint offset = serializedGameState.length;
-        uint stringLength;
+        SerializationBuffer memory buffer = SerializationBuffer(serializedGameState, serializedGameState.length);
 
-        self.id = BytesToTypes.bytesToInt64(offset, serializedGameState);
-        offset -= SizeOf.sizeOfInt(64);
+        self.id = BytesToTypes.bytesToInt64(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(64);
 
-        self.currentPlayerIndex = BytesToTypes.bytesToUint8(offset, serializedGameState);
-        offset -= SizeOf.sizeOfInt(8);
+        self.currentPlayerIndex = BytesToTypes.bytesToUint8(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
 
         self.playerStates = new ZBGameMode.PlayerState[](2);
         for (uint i = 0; i < self.playerStates.length; i++) {
-            // Generic
-            self.playerStates[i].defense = BytesToTypes.bytesToUint8(offset, serializedGameState);
-            offset -= SizeOf.sizeOfInt(8);
-
-            self.playerStates[i].currentGoo = BytesToTypes.bytesToUint8(offset, serializedGameState);
-            offset -= SizeOf.sizeOfInt(8);
-
-            self.playerStates[i].gooVials = BytesToTypes.bytesToUint8(offset, serializedGameState);
-            offset -= SizeOf.sizeOfInt(8);
-
-            // Deck
-            ZBGameMode.Deck memory deck;
-
-            deck.id = BytesToTypes.bytesToInt64(offset, serializedGameState);
-            offset -= SizeOf.sizeOfInt(64);
-
-            stringLength = BytesToTypes.getStringSize(offset, serializedGameState);
-            deck.name = new string(stringLength);
-            BytesToTypes.bytesToString(offset, serializedGameState, bytes(deck.name));
-            offset -= stringLength;
-
-            deck.heroId = BytesToTypes.bytesToInt64(offset, serializedGameState);
-            offset -= SizeOf.sizeOfInt(64);
-
-            uint8 cardCount = BytesToTypes.bytesToUint8(offset, serializedGameState);
-            offset -= SizeOf.sizeOfInt(8);
-
-            deck.cards = new ZBGameMode.CollectionCard[](cardCount);
-
-            for (uint j = 0; j < deck.cards.length; j++) {
-                stringLength = BytesToTypes.getStringSize(offset, serializedGameState);
-                deck.cards[j].name = new string(stringLength);
-                BytesToTypes.bytesToString(offset, serializedGameState, bytes(deck.cards[j].name));
-                offset -= stringLength;
-
-                deck.cards[j].amount = BytesToTypes.bytesToInt64(offset, serializedGameState);
-                offset -= SizeOf.sizeOfInt(64);
-            }
-
-            self.playerStates[i].deck = deck;
-            delete(deck);
+            self.playerStates[i] = deserializePlayerState(buffer);
         }
+    }
+
+    function deserializePlayerState(SerializationBuffer memory buffer) private pure returns (ZBGameMode.PlayerState) {
+        ZBGameMode.PlayerState memory player;
+
+        uint stringLength = BytesToTypes.getStringSize(buffer.offset, buffer.buffer);
+        player.id = new string(stringLength);
+        BytesToTypes.bytesToString(buffer.offset, buffer.buffer, bytes(player.id));
+        buffer.offset -= stringLength;
+
+        player.deck = deserializeDeck(buffer);
+        player.cardsInHand = deserializeCardInstanceArray(buffer);
+        player.cardsInDeck = deserializeCardInstanceArray(buffer);
+
+        player.defense = BytesToTypes.bytesToUint8(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
+
+        player.currentGoo = BytesToTypes.bytesToUint8(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
+
+        player.gooVials = BytesToTypes.bytesToUint8(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
+
+        player.initialCardsInHandCount = BytesToTypes.bytesToUint8(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
+
+        player.maxCardsInPlay = BytesToTypes.bytesToUint8(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
+
+        player.maxCardsInHand = BytesToTypes.bytesToUint8(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
+
+        player.maxGooVials = BytesToTypes.bytesToUint8(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
+
+        return player;
+    }
+
+    function serializeCardPrototype(SerializationBuffer memory buffer, ZBGameMode.CardPrototype card) private pure {
+        TypesToBytes.stringToBytes(buffer.offset, bytes(card.name), buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfString(card.name);
+
+        TypesToBytes.intToBytes(buffer.offset, card.gooCost, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
+    }
+
+    function deserializeCardPrototype(SerializationBuffer memory buffer) private pure returns (ZBGameMode.CardPrototype) {
+        ZBGameMode.CardPrototype memory card;
+
+        uint stringLength = BytesToTypes.getStringSize(buffer.offset, buffer.buffer);
+        card.name = new string(stringLength);
+        BytesToTypes.bytesToString(buffer.offset, buffer.buffer, bytes(card.name));
+        buffer.offset -= stringLength;
+
+        card.gooCost = BytesToTypes.bytesToUint8(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
+
+        return card;
+    }
+
+    function serializeCardInstance(SerializationBuffer memory buffer, ZBGameMode.CardInstance card) private pure {
+        TypesToBytes.intToBytes(buffer.offset, card.instanceId, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+
+        serializeCardPrototype(buffer, card.prototype);
+
+        TypesToBytes.intToBytes(buffer.offset, card.defense, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+
+        TypesToBytes.intToBytes(buffer.offset, card.attack, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+
+        TypesToBytes.stringToBytes(buffer.offset, bytes(card.owner), buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfString(card.owner);
+    }
+
+    function deserializeCardInstance(SerializationBuffer memory buffer) private pure returns (ZBGameMode.CardInstance) {
+        ZBGameMode.CardInstance memory card;
+
+        card.instanceId = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+
+        card.prototype = deserializeCardPrototype(buffer);
+
+        card.defense = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+
+        card.attack = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+
+        uint stringLength = BytesToTypes.getStringSize(buffer.offset, buffer.buffer);
+        card.owner = new string(stringLength);
+        BytesToTypes.bytesToString(buffer.offset, buffer.buffer, bytes(card.owner));
+        buffer.offset -= stringLength;
+
+        return card;
+    }
+
+    function serializeCardInstanceArray(SerializationBuffer memory buffer, ZBGameMode.CardInstance[] cards) internal pure {
+        TypesToBytes.uintToBytes(buffer.offset, cards.length, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+
+        for (uint i = 0; i < cards.length; i++) {
+            serializeCardInstance(buffer, cards[i]);
+        }
+    }
+
+    function deserializeCardInstanceArray(SerializationBuffer memory buffer) private pure returns (ZBGameMode.CardInstance[]) {
+        uint32 length = BytesToTypes.bytesToUint32(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+
+        ZBGameMode.CardInstance[] memory cards = new ZBGameMode.CardInstance[](length);
+        for (uint i = 0; i < length; i++) {
+            cards[i] = deserializeCardInstance(buffer);
+        }
+
+        return cards;
+    }
+
+    function deserializeDeck(SerializationBuffer memory buffer) private pure returns (ZBGameMode.Deck) {
+        ZBGameMode.Deck memory deck;
+
+        deck.id = BytesToTypes.bytesToInt64(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(64);
+
+        uint stringLength = BytesToTypes.getStringSize(buffer.offset, buffer.buffer);
+        deck.name = new string(stringLength);
+        BytesToTypes.bytesToString(buffer.offset, buffer.buffer, bytes(deck.name));
+        buffer.offset -= stringLength;
+
+        deck.heroId = BytesToTypes.bytesToInt64(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(64);
+
+        return deck;
+    }
+
+    function serializeStartGameStateChangeAction(SerializationBuffer memory buffer, ZBEnum.GameStateChangeAction action) private pure {
+        TypesToBytes.intToBytes(buffer.offset, uint32(action), buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+    }
+
+    function serializeStartGameStateChangeAction(
+        SerializationBuffer memory buffer,
+        ZBEnum.GameStateChangeAction action,
+        ZBGameMode.Player player
+        ) private pure {
+        TypesToBytes.intToBytes(buffer.offset, uint32(action), buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+
+        TypesToBytes.intToBytes(buffer.offset, uint8(player), buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
     }
 
     // SerializedGameStateChanges
 
+    function init(SerializedGameStateChanges memory self) internal pure {
+        init(self, 2 ** 14);
+    }
+
     function init(SerializedGameStateChanges memory self, uint bufferSize) internal pure {
-        self.buffer = new bytes(bufferSize);
-        self.offset = bufferSize;
+        self.buffer = SerializationBuffer(new bytes(bufferSize), bufferSize);
     }
 
     function getBytes(SerializedGameStateChanges memory self) internal pure returns (bytes) {
-        return self.buffer;
+        return self.buffer.buffer;
     }
 
-    function changePlayerDefense(SerializedGameStateChanges memory self, uint8 playerIndex, uint8 defense) internal pure returns (uint) {
-        serializeStartGameStateChangeAction(self, ZBEnum.GameStateChangeAction.SetPlayerDefense);
+    function changePlayerDefense(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 defense) internal pure returns (uint) {
+        SerializationBuffer memory buffer = self.buffer;
+        serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerDefense, player);
 
-        TypesToBytes.intToBytes(self.offset, playerIndex, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(8);
-
-        TypesToBytes.intToBytes(self.offset, defense, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(8);
+        TypesToBytes.intToBytes(buffer.offset, defense, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
     }
 
-    function changePlayerCurrentGoo(SerializedGameStateChanges memory self, uint8 playerIndex, uint8 currentGoo) internal pure {
-        serializeStartGameStateChangeAction(self, ZBEnum.GameStateChangeAction.SetPlayerCurrentGoo);
+    function changePlayerCurrentGoo(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 currentGoo) internal pure {
+        SerializationBuffer memory buffer = self.buffer;
+        serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerCurrentGoo, player);
 
-        TypesToBytes.intToBytes(self.offset, playerIndex, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(8);
-
-        TypesToBytes.intToBytes(self.offset, currentGoo, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(8);
+        TypesToBytes.intToBytes(buffer.offset, currentGoo, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
     }
 
-    function changePlayerGooVials(SerializedGameStateChanges memory self, uint8 playerIndex, uint8 gooVials) internal pure {
-        serializeStartGameStateChangeAction(self, ZBEnum.GameStateChangeAction.SetPlayerGooVials);
+    function changePlayerGooVials(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 gooVials) internal pure {
+        SerializationBuffer memory buffer = self.buffer;
+        serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerGooVials, player);
 
-        TypesToBytes.intToBytes(self.offset, playerIndex, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(8);
-
-        TypesToBytes.intToBytes(self.offset, gooVials, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(8);
+        TypesToBytes.intToBytes(buffer.offset, gooVials, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
     }
 
-    function changePlayerDeckCards(SerializedGameStateChanges memory self, uint8 playerIndex, ZBGameMode.CollectionCard[] cards) internal pure {
-        serializeStartGameStateChangeAction(self, ZBEnum.GameStateChangeAction.SetPlayerDeckCards);
+    function changePlayerCardsInDeck(
+        SerializedGameStateChanges memory self,
+        ZBGameMode.Player player,
+        ZBGameMode.CardInstance[] cards
+        ) internal pure {
+        SerializationBuffer memory buffer = self.buffer;
 
-        TypesToBytes.intToBytes(self.offset, playerIndex, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(8);
+        serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerCardsInDeck, player);
 
-        TypesToBytes.intToBytes(self.offset, uint8(cards.length), self.buffer);
-        self.offset -= SizeOf.sizeOfInt(8);
+        TypesToBytes.intToBytes(buffer.offset, uint32(cards.length), buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
 
         for (uint i = 0; i < cards.length; i++) {
-            serializeCollectionCard(self, cards[i]);
+            serializeCardInstance(buffer, cards[i]);
         }
     }
 
-    function serializeStartGameStateChangeAction(SerializedGameStateChanges memory self, ZBEnum.GameStateChangeAction action) private pure {
-        TypesToBytes.intToBytes(self.offset, uint32(action), self.buffer);
-        self.offset -= SizeOf.sizeOfInt(32);
+    function changePlayerCardsInHand(
+        SerializedGameStateChanges memory self,
+        ZBGameMode.Player player,
+        ZBGameMode.CardInstance[] cards
+        ) internal pure {
+        SerializationBuffer memory buffer = self.buffer;
+
+        serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerCardsInHand, player);
+
+        TypesToBytes.intToBytes(buffer.offset, uint32(cards.length), buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+
+        for (uint i = 0; i < cards.length; i++) {
+            serializeCardInstance(buffer, cards[i]);
+        }
     }
 
-    function serializeCollectionCard(SerializedGameStateChanges memory self, ZBGameMode.CollectionCard card) private pure {
-        TypesToBytes.stringToBytes(self.offset, bytes(card.name), self.buffer);
-        self.offset -= SizeOf.sizeOfString(card.name);
+    function changePlayerInitialCardsInHandCount(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 count) internal pure {
+        SerializationBuffer memory buffer = self.buffer;
+        serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerInitialCardsInHandCount, player);
 
-        TypesToBytes.intToBytes(self.offset, card.amount, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(64);
+        TypesToBytes.intToBytes(buffer.offset, count, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
+    }
+
+
+    function changePlayerMaxCardsInPlay(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 count) internal pure {
+        SerializationBuffer memory buffer = self.buffer;
+        serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerMaxCardsInPlay, player);
+
+        TypesToBytes.intToBytes(buffer.offset, count, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
+    }
+
+    function changePlayerMaxCardsInHand(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 count) internal pure {
+        SerializationBuffer memory buffer = self.buffer;
+        serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerMaxCardsInHand, player);
+
+        TypesToBytes.intToBytes(buffer.offset, count, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
+    }
+
+    function changePlayerMaxGooVials(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 count) internal pure {
+        SerializationBuffer memory buffer = self.buffer;
+        serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerMaxGooVials, player);
+
+        TypesToBytes.intToBytes(buffer.offset, count, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(8);
     }
 
     // SerializedCustomUi
 
+    function init(SerializedCustomUi memory self) internal pure {
+        init(self, 2 ** 14);
+    }
+
     function init(SerializedCustomUi memory self, uint bufferSize) internal pure {
-        self.buffer = new bytes(bufferSize);
-        self.offset = bufferSize;
+        self.buffer = SerializationBuffer(new bytes(bufferSize), bufferSize);
     }
 
     function getBytes(SerializedCustomUi memory self) internal pure returns (bytes) {
-        return self.buffer;
+        return self.buffer.buffer;
     }
 
-    function label(SerializedCustomUi memory self, ZBGameMode.Rect rect, string text) internal pure {
-        serializeStartCustomUiElement(self, ZBEnum.CustomUiElement.Label, rect);
+    function add(SerializedCustomUi memory self, ZBGameMode.CustomUiLabel label) internal pure {
+        SerializationBuffer memory buffer = self.buffer;
 
-        TypesToBytes.stringToBytes(self.offset, bytes(text), self.buffer);
-        self.offset -= SizeOf.sizeOfString(text);
+        serializeStartCustomUiElement(buffer, ZBEnum.CustomUiElement.Label, label.rect);
+
+        TypesToBytes.stringToBytes(buffer.offset, bytes(label.text), buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfString(label.text);
     }
 
-    function button(SerializedCustomUi memory self, ZBGameMode.Rect rect, string title, string onClickFunctionName) internal pure {
-        serializeStartCustomUiElement(self, ZBEnum.CustomUiElement.Button, rect);
+    function add(SerializedCustomUi memory self, ZBGameMode.CustomUiButton button) internal pure {
+        SerializationBuffer memory buffer = self.buffer;
 
-        TypesToBytes.stringToBytes(self.offset, bytes(title), self.buffer);
-        self.offset -= SizeOf.sizeOfString(title);
+        serializeStartCustomUiElement(buffer, ZBEnum.CustomUiElement.Button, button.rect);
 
-        TypesToBytes.stringToBytes(self.offset, bytes(onClickFunctionName), self.buffer);
-        self.offset -= SizeOf.sizeOfString(onClickFunctionName);
+        TypesToBytes.stringToBytes(buffer.offset, bytes(button.title), buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfString(button.title);
+
+        TypesToBytes.stringToBytes(buffer.offset, button.onClickCallData, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfString(string(button.onClickCallData));
     }
 
-    function serializeStartCustomUiElement(SerializedCustomUi memory self, ZBEnum.CustomUiElement element) private pure {
+    function serializeStartCustomUiElement(SerializationBuffer memory self, ZBEnum.CustomUiElement element) private pure {
         TypesToBytes.intToBytes(self.offset, uint32(element), self.buffer);
         self.offset -= SizeOf.sizeOfInt(32);
     }
 
-    function serializeStartCustomUiElement(SerializedCustomUi memory self, ZBEnum.CustomUiElement element, ZBGameMode.Rect rect) private pure {
+    function serializeStartCustomUiElement(SerializationBuffer memory self, ZBEnum.CustomUiElement element, ZBGameMode.Rect rect) private pure {
         serializeStartCustomUiElement(self, element);
         self.offset = serializeRect(self.buffer, self.offset, rect);
     }

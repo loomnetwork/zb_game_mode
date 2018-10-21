@@ -7,6 +7,10 @@ import "./../3rdParty/Seriality/SizeOf.sol";
 import "./../3rdParty/Seriality/TypesToBytes.sol";
 
 library ZBGameModeSerialization {
+    event GameStateChanges (
+        bytes serializedChanges
+    );
+
     struct SerializationBuffer {
         bytes buffer;
         uint offset;
@@ -202,6 +206,10 @@ library ZBGameModeSerialization {
         return self.buffer.buffer;
     }
 
+    function emit(SerializedGameStateChanges memory self) internal {
+        emit GameStateChanges(getBytes(self));
+    }
+
     function changePlayerDefense(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 defense) internal pure returns (uint) {
         SerializationBuffer memory buffer = self.buffer;
         serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerDefense, player);
@@ -267,7 +275,6 @@ library ZBGameModeSerialization {
         TypesToBytes.intToBytes(buffer.offset, count, buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(8);
     }
-
 
     function changePlayerMaxCardsInPlay(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 count) internal pure {
         SerializationBuffer memory buffer = self.buffer;

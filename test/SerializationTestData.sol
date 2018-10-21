@@ -13,6 +13,10 @@ contract SerializationTestData {
     using ZBGameModeSerialization for ZBGameModeSerialization.SerializedCustomUi;
     using ZBGameModeSerialization for ZBGameMode.GameState;
 
+    event GameStateChanges (
+        bytes serializedChanges
+    );
+
     function serializeInts() public pure returns (bytes) {
         bytes memory buffer = new bytes(64);
         uint offset = 64;
@@ -45,7 +49,7 @@ contract SerializationTestData {
         return buffer;
     }
 
-    function serializeGameStateChangeActions() public pure returns (bytes) {
+    function serializeGameStateChangeActions() public {
         ZBGameModeSerialization.SerializedGameStateChanges memory changes;
         changes.init(96);
         changes.changePlayerDefense(ZBGameMode.Player.Player1, 5);
@@ -54,7 +58,7 @@ contract SerializationTestData {
         changes.changePlayerGooVials(ZBGameMode.Player.Player2, 8);
         changes.changePlayerCurrentGoo(ZBGameMode.Player.Player1, 2);
         changes.changePlayerCurrentGoo(ZBGameMode.Player.Player2, 6);
-        return changes.getBytes();
+        changes.emit();
     }
 
     function serializeGameStateChangePlayerCardsInHand() public pure returns (bytes) {

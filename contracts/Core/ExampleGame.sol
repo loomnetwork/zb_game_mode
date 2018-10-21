@@ -12,20 +12,19 @@ contract ExampleGame is ZBGameMode  {
 
     uint counter = 0;
 
-    function name() public view returns (string) {
-        return  "ExampleGame";
+    function name() external view returns (string) {
+        return "ExampleGame";
     }
 
-    function onMatchStartingBeforeInitialDraw(bytes) public pure returns (bytes) {
+    function onMatchStartingBeforeInitialDraw(bytes) external {
         ZBGameModeSerialization.SerializedGameStateChanges memory changes;
         changes.init(2 ** 15);
         changes.changePlayerInitialCardsInHandCount(Player.Player1, 2);
         changes.changePlayerInitialCardsInHandCount(Player.Player2, 2);
-
-        return changes.getBytes();
+        changes.emit();
     }
 
-    function onMatchStartingAfterInitialDraw(bytes serializedGameState) external pure returns(bytes) {
+    function onMatchStartingAfterInitialDraw(bytes serializedGameState) external {
         GameState memory gameState;
         gameState.initWithSerializedData(serializedGameState);
 
@@ -55,11 +54,10 @@ contract ExampleGame is ZBGameMode  {
         changes.changePlayerCardsInHand(Player.Player2, gameState.playerStates[1].cardsInHand);
         changes.changePlayerCardsInDeck(Player.Player1, gameState.playerStates[0].cardsInDeck);
         changes.changePlayerCardsInDeck(Player.Player2, gameState.playerStates[1].cardsInDeck);
-
-        return changes.getBytes();
+        changes.emit();
     }
 
-    function getCustomUi() public view returns (bytes) {
+    function getCustomUi() external view returns (bytes) {
         ZBGameModeSerialization.SerializedCustomUi memory customUi;
         customUi.init();
         customUi.add(

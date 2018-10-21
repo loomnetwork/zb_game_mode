@@ -78,41 +78,19 @@ contract ZBGameMode {
         bytes onClickCallData;
     }
 
-    event MatchedStarted(
-        address indexed _from
-    );
-    event MatchFinished(
-        address player1Addr,  address player2Addr, uint winner
-    );
-    event AwardTokens(
-        address indexed to,
-        uint tokens
-    );
-    //Awards a specific Card
-    event AwardCard(
-        address indexed to,
-        uint cardID
-    );
-    event AwardPack(
-        address indexed to,
-        uint packCount,
-        uint packType
-    );
-    event UserRegistered(
-        address indexed _from
+    event GameStateChanges (
+        bytes serializedChanges
     );
 
-    function name() public view returns (string);
+    function name() external view returns (string);
 
-    function onMatchStartingBeforeInitialDraw(bytes) public pure returns (bytes) {
-        return new bytes(0);
+    function onMatchStartingBeforeInitialDraw(bytes) external {
     }
 
-    function onMatchStartingAfterInitialDraw(bytes) external pure returns (bytes) {
-        return new bytes(0);
+    function onMatchStartingAfterInitialDraw(bytes) external  {
     }
 
-    function getCustomUi() public view returns (bytes) {
+    function getCustomUi() external view returns (bytes) {
         return new bytes(0);
     }
 }

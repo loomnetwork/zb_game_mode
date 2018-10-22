@@ -7,11 +7,11 @@ contract ExampleGame is ZBGameMode  {
 
     mapping (string => bool) internal bannedCards;
 
-    function onMatchStartingBeforeInitialDraw(bytes serializedGameState) external {
+    function beforeMatchStart(bytes serializedGameState) external {
         GameState memory gameState;
-        gameState.initWithSerializedData(serializedGameState);
+        gameState.init(serializedGameState);
 
-        ZBGameModeSerialization.SerializedGameStateChanges memory changes;
+        ZBSerializer.SerializedGameStateChanges memory changes;
         changes.init(2 ** 15);
 
         initializeDeckRules();

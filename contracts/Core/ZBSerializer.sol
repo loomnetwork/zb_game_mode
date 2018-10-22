@@ -6,7 +6,7 @@ import "./../3rdParty/Seriality/BytesToTypes.sol";
 import "./../3rdParty/Seriality/SizeOf.sol";
 import "./../3rdParty/Seriality/TypesToBytes.sol";
 
-library ZBGameModeSerialization {
+library ZBSerializer {
     event GameStateChanges (
         bytes serializedChanges
     );
@@ -26,7 +26,7 @@ library ZBGameModeSerialization {
 
     // GameState deserialization
 
-    function initWithSerializedData(ZBGameMode.GameState memory self, bytes serializedGameState) internal pure {
+    function init(ZBGameMode.GameState memory self, bytes serializedGameState) internal pure {
         SerializationBuffer memory buffer = SerializationBuffer(serializedGameState, serializedGameState.length);
 
         self.id = BytesToTypes.bytesToInt64(buffer.offset, buffer.buffer);

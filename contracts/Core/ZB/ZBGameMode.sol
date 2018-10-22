@@ -1,17 +1,54 @@
 pragma solidity ^0.4.24;
 
-import "./../../Interfaces/ZBMode.sol";
 //import "./../../Interfaces/ERC721XReceiver.sol";
 import "./ZBEnum.sol";
 import "./../ZBGameModeSerialization.sol";
 
-contract ZBGameMode is ZBMode {
+contract ZBGameMode {
     using ZBGameModeSerialization for ZBGameModeSerialization.SerializedGameStateChanges;
     using ZBGameModeSerialization for GameState;
 
+    enum Player {
+        Player1,
+        Player2
+    }
+
     struct PlayerState {
+        string id;
+        //PlayerActionType currentAction = 2;
+        //OverlordInstance overlordInstance = 3;
+        CardInstance[] cardsInHand;
+        //CardInstance[] CardsInPlay;
+        CardInstance[] cardsInDeck;
+        Deck deck;
         uint8 defense;
-        uint8 goo;
+        uint8 currentGoo;
+        uint8 gooVials;
+        //bool hasDrawnCard = 11;
+        //repeated CardInstance cardsInGraveyard = 12;
+        uint8 initialCardsInHandCount;
+        uint8 maxCardsInPlay;
+        uint8 maxCardsInHand;
+        uint8 maxGooVials;
+    }
+
+    struct Deck {
+        int64 id;
+        string name;
+        int64 heroId;
+    }
+
+    struct CardPrototype {
+        string name;
+        uint8 gooCost;
+    }
+
+    struct CardInstance {
+        int32 instanceId;
+        CardPrototype prototype;
+        int32 defense;
+        int32 attack;
+        string owner;
     }
 
     struct GameState {
@@ -30,35 +67,30 @@ contract ZBGameMode is ZBMode {
         Vector2Int size;
     }
 
-    event MatchedStarted(
-        address indexed _from
-    );
-    event MatchFinished(
-        address player1Addr,  address player2Addr, uint winner
-    );
-    event AwardTokens(
-        address indexed to,
-        uint tokens
-    );
-    //Awards a specific Card
-    event AwardCard(
-        address indexed to,
-        uint cardID
-    );
-    event AwardPack(
-        address indexed to,
-        uint packCount,
-        uint packType
-    );
-    event UserRegistered(
-        address indexed _from
-    );
-
-    function onMatchStarting(bytes) public pure returns (bytes) {
-        return new bytes(0);
+    struct CustomUiLabel {
+        Rect rect;
+        string text;
     }
 
-    function getCustomUi() public view returns (bytes) {
+    struct CustomUiButton {
+        Rect rect;
+        string title;
+        bytes onClickCallData;
+    }
+
+    event GameStateChanges (
+        bytes serializedChanges
+    );
+
+    function name() external view returns (string);
+
+    function onMatchStartingBeforeInitialDraw(bytes) external {
+    }
+
+    function onMatchStartingAfterInitialDraw(bytes) external  {
+    }
+
+    function getCustomUi() external view returns (bytes) {
         return new bytes(0);
     }
 }

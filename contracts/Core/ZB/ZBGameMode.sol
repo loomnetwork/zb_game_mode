@@ -1,6 +1,5 @@
 pragma solidity ^0.4.24;
 
-//import "./../../Interfaces/ERC721XReceiver.sol";
 import "./ZBEnum.sol";
 import "./../ZBSerializer.sol";
 
@@ -85,7 +84,7 @@ contract ZBGameMode {
     function beforeMatchStart(bytes) external {
     }
 
-    function afterInitialDraw(bytes) external  {
+    function afterInitialDraw(bytes) external {
     }
 
     function getCustomUi() external view returns (bytes) {

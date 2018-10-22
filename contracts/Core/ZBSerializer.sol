@@ -195,7 +195,7 @@ library ZBSerializer {
     // SerializedGameStateChanges
 
     function init(SerializedGameStateChanges memory self) internal pure {
-        init(self, 2 ** 14);
+        init(self, 2 ** 15);
     }
 
     function init(SerializedGameStateChanges memory self, uint bufferSize) internal pure {

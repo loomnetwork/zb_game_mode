@@ -57,10 +57,6 @@ contract ConquerMode is ZBGameMode  {
         return  userAccts.length;
     }
 
-    function name() external view returns (string) {
-        return "ConquerMode";
-    }
-
     constructor() public {
 
     }

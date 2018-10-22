@@ -5,6 +5,30 @@ import "./ZB/ZBEnum.sol";
 
 
 contract ConquerMode is ZBGameMode  {
+    event MatchedStarted(
+        address indexed _from
+    );
+    event MatchFinished(
+        address player1Addr,  address player2Addr, uint winner
+    );
+    event AwardTokens(
+        address indexed to,
+        uint tokens
+    );
+    //Awards a specific Card
+    event AwardCard(
+        address indexed to,
+        uint cardID
+    );
+    event AwardPack(
+        address indexed to,
+        uint packCount,
+        uint packType
+    );
+    event UserRegistered(
+        address indexed _from
+    );
+
     enum Stages {
         Paid,
         Playing,
@@ -34,7 +58,7 @@ contract ConquerMode is ZBGameMode  {
     }
 
     function name() external view returns (string) {
-        return  "ConquerMode";
+        return "ConquerMode";
     }
 
     constructor() public {
@@ -53,7 +77,7 @@ contract ConquerMode is ZBGameMode  {
 
         //TODO make sure ticket is only used once
 
-        emit ZBGameMode.UserRegistered(useraddr);
+        emit UserRegistered(useraddr);
     }
 
     function GameStart(address useraddr1, address useraddr2) external {
@@ -66,8 +90,8 @@ contract ConquerMode is ZBGameMode  {
         player1.status = uint(Stages.Playing);
         player2.status = uint(Stages.Playing);
 
-        emit ZBGameMode.MatchedStarted(useraddr1);
-        emit ZBGameMode.MatchedStarted(useraddr2);
+        emit MatchedStarted(useraddr1);
+        emit MatchedStarted(useraddr2);
     }
 
     //TODO should we break this into two events, 1 per player?
@@ -86,7 +110,7 @@ contract ConquerMode is ZBGameMode  {
         gameFinishedPlayer(player1Addr, player1Wins);
         gameFinishedPlayer(player2Addr, player2Wins);
 
-        emit ZBGameMode.MatchFinished(player1Addr, player2Addr, winner);
+        emit MatchFinished(player1Addr, player2Addr, winner);
     }
 
     // winner 0, for lose, 1 for win, 2 for muligan
@@ -103,10 +127,10 @@ contract ConquerMode is ZBGameMode  {
 
             //TODO perhaps switch this to a state machine
             if(player.wins == 7){
-                emit ZBGameMode.AwardTokens(playerAddr, costToEnter);
+                emit AwardTokens(playerAddr, costToEnter);
             }
             if(player.wins == 12){
-                emit ZBGameMode.AwardPack(playerAddr, 1, 0);
+                emit AwardPack(playerAddr, 1, 0);
                 player.status = uint(Stages.Finished);
             }
         } else if (winner == 0) {

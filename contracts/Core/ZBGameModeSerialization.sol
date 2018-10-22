@@ -226,7 +226,7 @@ library ZBGameModeSerialization {
         buffer.offset -= SizeOf.sizeOfInt(8);
     }
 
-    function changePlayerGooVials(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 gooVials) internal pure {
+    function changePlayerCurrentGooVials(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 gooVials) internal pure {
         SerializationBuffer memory buffer = self.buffer;
         serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerGooVials, player);
 

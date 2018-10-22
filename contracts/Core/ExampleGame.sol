@@ -7,18 +7,6 @@ contract ExampleGame is ZBGameMode  {
 
     mapping (string => bool) internal bannedCards;
 
-    function name() external pure returns (string) {
-        return "Example Game Mode";
-    }
-
-    function author() external pure returns (string) {
-        return "H4XF13LD MORRIS";
-    }
-
-    function description() external pure returns (string) {
-        return "This is an example game mode template, showing the different variables you can tweak in your custom game modes and how to ban specific cards.";
-    }
-
     function onMatchStartingBeforeInitialDraw(bytes serializedGameState) external {
         GameState memory gameState;
         gameState.initWithSerializedData(serializedGameState);

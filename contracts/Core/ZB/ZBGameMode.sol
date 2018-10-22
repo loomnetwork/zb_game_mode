@@ -82,8 +82,6 @@ contract ZBGameMode {
         bytes serializedChanges
     );
 
-    function name() external pure returns (string);
-
     function onMatchStartingBeforeInitialDraw(bytes) external {
     }
 

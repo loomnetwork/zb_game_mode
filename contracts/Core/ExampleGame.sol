@@ -8,11 +8,12 @@ contract ExampleGame is ZBGameMode  {
     mapping (string => bool) internal bannedCards;
 
     function beforeMatchStart(bytes serializedGameState) external {
+
         GameState memory gameState;
         gameState.init(serializedGameState);
 
         ZBSerializer.SerializedGameStateChanges memory changes;
-        changes.init(2 ** 15);
+        changes.init();
 
         initializeDeckRules();
 
@@ -28,9 +29,16 @@ contract ExampleGame is ZBGameMode  {
 
         // Go through each player's deck and modify it to remove banned cards
         for (uint i = 0; i < gameState.playerStates.length; i++) {
-            CardInstance[] memory newCards;
-            uint count = 0;
+            uint totalCount = 0;
             for (uint j = 0; j < gameState.playerStates[i].cardsInDeck.length; j++) {
+                if (!isBanned(gameState.playerStates[i].cardsInDeck[j].prototype.name)) {
+                    totalCount++;
+                }
+            }
+
+            CardInstance[] memory newCards = new CardInstance[](totalCount);
+            uint count = 0;
+            for (j = 0; j < gameState.playerStates[i].cardsInDeck.length; j++) {
                 if (!isBanned(gameState.playerStates[i].cardsInDeck[j].prototype.name)) {
                     newCards[count] = gameState.playerStates[i].cardsInDeck[j];
                     count++;

@@ -2,11 +2,11 @@ pragma solidity ^0.4.24;
 
 //import "./../../Interfaces/ERC721XReceiver.sol";
 import "./ZBEnum.sol";
-import "./../ZBGameModeSerialization.sol";
+import "./../ZBSerializer.sol";
 
 contract ZBGameMode {
-    using ZBGameModeSerialization for ZBGameModeSerialization.SerializedGameStateChanges;
-    using ZBGameModeSerialization for GameState;
+    using ZBSerializer for ZBSerializer.SerializedGameStateChanges;
+    using ZBSerializer for GameState;
 
     enum Player {
         Player1,
@@ -82,12 +82,10 @@ contract ZBGameMode {
         bytes serializedChanges
     );
 
-    function name() external view returns (string);
-
-    function onMatchStartingBeforeInitialDraw(bytes) external {
+    function beforeMatchStart(bytes) external {
     }
 
-    function onMatchStartingAfterInitialDraw(bytes) external  {
+    function afterInitialDraw(bytes) external  {
     }
 
     function getCustomUi() external view returns (bytes) {

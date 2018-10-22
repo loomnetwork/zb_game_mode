@@ -6,7 +6,7 @@ import "./../3rdParty/Seriality/BytesToTypes.sol";
 import "./../3rdParty/Seriality/SizeOf.sol";
 import "./../3rdParty/Seriality/TypesToBytes.sol";
 
-library ZBGameModeSerialization {
+library ZBSerializer {
     event GameStateChanges (
         bytes serializedChanges
     );
@@ -26,7 +26,7 @@ library ZBGameModeSerialization {
 
     // GameState deserialization
 
-    function initWithSerializedData(ZBGameMode.GameState memory self, bytes serializedGameState) internal pure {
+    function init(ZBGameMode.GameState memory self, bytes serializedGameState) internal pure {
         SerializationBuffer memory buffer = SerializationBuffer(serializedGameState, serializedGameState.length);
 
         self.id = BytesToTypes.bytesToInt64(buffer.offset, buffer.buffer);
@@ -226,7 +226,7 @@ library ZBGameModeSerialization {
         buffer.offset -= SizeOf.sizeOfInt(8);
     }
 
-    function changePlayerGooVials(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 gooVials) internal pure {
+    function changePlayerCurrentGooVials(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 gooVials) internal pure {
         SerializationBuffer memory buffer = self.buffer;
         serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerGooVials, player);
 

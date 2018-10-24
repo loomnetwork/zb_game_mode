@@ -12,11 +12,11 @@ contract ChangeCardsTestGame is ZBGameMode  {
 
         for (uint i = 0; i < gameState.playerStates.length; i++) {
             for (uint j = 0; j < gameState.playerStates[i].cardsInDeck.length; j++) {
-                gameState.playerStates[i].cardsInDeck[j].prototype.name = i == 0 ? "Pyromaz" : "Fire-Maw";
+                gameState.playerStates[i].cardsInDeck[j].name = i == 0 ? "Pyromaz" : "Fire-Maw";
             }
 
             for (j = 0; j < gameState.playerStates[i].cardsInHand.length; j++) {
-                gameState.playerStates[i].cardsInHand[j].prototype.name = i == 0 ? "Zhampion" : "Gargantua";
+                gameState.playerStates[i].cardsInHand[j].name = i == 0 ? "Zhampion" : "Gargantua";
             }
 
             changes.changePlayerCardsInDeck(Player(i), gameState.playerStates[i].cardsInDeck);

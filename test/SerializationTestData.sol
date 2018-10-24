@@ -64,10 +64,16 @@ contract SerializationTestData {
     function serializeGameStateChangePlayerCardsInHand() public pure returns (bytes) {
         ZBGameMode.CardInstance[] memory cards = new ZBGameMode.CardInstance[](2);
         cards[0].instanceId = 2;
-        cards[0].name = "Zhampion";
+        cards[0].mouldName = "Zhampion";
+        cards[0].defense = 4;
+        cards[0].attack = 5;
+        cards[0].gooCost = 6;
 
         cards[0].instanceId = 3;
-        cards[0].name = "Fire-maw3";
+        cards[0].mouldName = "Fire-maw";
+        cards[0].defense = 7;
+        cards[0].attack = 8;
+        cards[0].gooCost = 9;
 
         ZBSerializer.SerializedGameStateChanges memory changes;
         changes.init(512);

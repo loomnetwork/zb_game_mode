@@ -39,7 +39,7 @@ contract ZBGameMode {
 
     struct CardInstance {
         int32 instanceId;
-        string name;
+        string mouldName;
         int32 defense;
         bool defenseInherited;
         int32 attack;

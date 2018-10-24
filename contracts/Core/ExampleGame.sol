@@ -31,7 +31,7 @@ contract ExampleGame is ZBGameMode  {
         for (uint i = 0; i < gameState.playerStates.length; i++) {
             uint totalCount = 0;
             for (uint j = 0; j < gameState.playerStates[i].cardsInDeck.length; j++) {
-                if (!isBanned(gameState.playerStates[i].cardsInDeck[j].name)) {
+                if (!isBanned(gameState.playerStates[i].cardsInDeck[j].mouldName)) {
                     totalCount++;
                 }
             }
@@ -39,7 +39,7 @@ contract ExampleGame is ZBGameMode  {
             CardInstance[] memory newCards = new CardInstance[](totalCount);
             uint count = 0;
             for (j = 0; j < gameState.playerStates[i].cardsInDeck.length; j++) {
-                if (!isBanned(gameState.playerStates[i].cardsInDeck[j].name)) {
+                if (!isBanned(gameState.playerStates[i].cardsInDeck[j].mouldName)) {
                     newCards[count] = gameState.playerStates[i].cardsInDeck[j];
                     count++;
                 }

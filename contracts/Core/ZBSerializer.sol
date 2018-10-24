@@ -81,8 +81,8 @@ library ZBSerializer {
         TypesToBytes.intToBytes(buffer.offset, card.instanceId, buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(32);
 
-        TypesToBytes.stringToBytes(buffer.offset, bytes(card.name), buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfString(card.name);
+        TypesToBytes.stringToBytes(buffer.offset, bytes(card.mouldName), buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfString(card.mouldName);
 
         TypesToBytes.intToBytes(buffer.offset, card.defense, buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(32);
@@ -107,8 +107,8 @@ library ZBSerializer {
         buffer.offset -= SizeOf.sizeOfInt(32);
 
         uint stringLength = BytesToTypes.getStringSize(buffer.offset, buffer.buffer);
-        card.name = new string(stringLength);
-        BytesToTypes.bytesToString(buffer.offset, buffer.buffer, bytes(card.name));
+        card.mouldName = new string(stringLength);
+        BytesToTypes.bytesToString(buffer.offset, buffer.buffer, bytes(card.mouldName));
         buffer.offset -= stringLength;
 
         card.defense = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
@@ -182,6 +182,27 @@ library ZBSerializer {
 
         TypesToBytes.intToBytes(buffer.offset, uint8(player), buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(8);
+    }
+
+    // CardInstance
+
+    function changeMouldName(ZBGameMode.CardInstance memory self, string mouldName) internal pure {
+        self.mouldName = mouldName;
+    }
+
+    function changeDefense(ZBGameMode.CardInstance memory self, uint8 defense) internal pure {
+        self.defense = defense;
+        self.defenseInherited = false;
+    }
+
+    function changeAttack(ZBGameMode.CardInstance memory self, uint8 attack) internal pure {
+        self.attack = attack;
+        self.attackInherited = false;
+    }
+
+    function changeGooCost(ZBGameMode.CardInstance memory self, uint8 gooCost) internal pure {
+        self.gooCost = gooCost;
+        self.gooCostInherited = false;
     }
 
     // SerializedGameStateChanges

@@ -77,42 +77,13 @@ library ZBSerializer {
         return player;
     }
 
-    function serializeCardPrototype(SerializationBuffer memory buffer, ZBGameMode.CardPrototype card) private pure {
-        TypesToBytes.stringToBytes(buffer.offset, bytes(card.name), buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfString(card.name);
-
-        TypesToBytes.intToBytes(buffer.offset, card.gooCost, buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfInt(8);
-    }
-
-    function deserializeCardPrototype(SerializationBuffer memory buffer) private pure returns (ZBGameMode.CardPrototype) {
-        ZBGameMode.CardPrototype memory card;
-
-        uint stringLength = BytesToTypes.getStringSize(buffer.offset, buffer.buffer);
-        card.name = new string(stringLength);
-        BytesToTypes.bytesToString(buffer.offset, buffer.buffer, bytes(card.name));
-        buffer.offset -= stringLength;
-
-        card.gooCost = BytesToTypes.bytesToUint8(buffer.offset, buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfInt(8);
-
-        return card;
-    }
 
     function serializeCardInstance(SerializationBuffer memory buffer, ZBGameMode.CardInstance card) private pure {
         TypesToBytes.intToBytes(buffer.offset, card.instanceId, buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(32);
 
-        serializeCardPrototype(buffer, card.prototype);
-
-        TypesToBytes.intToBytes(buffer.offset, card.defense, buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfInt(32);
-
-        TypesToBytes.intToBytes(buffer.offset, card.attack, buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfInt(32);
-
-        TypesToBytes.stringToBytes(buffer.offset, bytes(card.owner), buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfString(card.owner);
+        TypesToBytes.stringToBytes(buffer.offset, bytes(card.name), buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfString(card.name);
     }
 
     function deserializeCardInstance(SerializationBuffer memory buffer) private pure returns (ZBGameMode.CardInstance) {
@@ -121,17 +92,9 @@ library ZBSerializer {
         card.instanceId = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(32);
 
-        card.prototype = deserializeCardPrototype(buffer);
-
-        card.defense = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfInt(32);
-
-        card.attack = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfInt(32);
-
         uint stringLength = BytesToTypes.getStringSize(buffer.offset, buffer.buffer);
-        card.owner = new string(stringLength);
-        BytesToTypes.bytesToString(buffer.offset, buffer.buffer, bytes(card.owner));
+        card.name = new string(stringLength);
+        BytesToTypes.bytesToString(buffer.offset, buffer.buffer, bytes(card.name));
         buffer.offset -= stringLength;
 
         return card;

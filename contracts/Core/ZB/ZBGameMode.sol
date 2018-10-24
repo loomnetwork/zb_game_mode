@@ -44,10 +44,7 @@ contract ZBGameMode {
 
     struct CardInstance {
         int32 instanceId;
-        CardPrototype prototype;
-        int32 defense;
-        int32 attack;
-        string owner;
+        string name;
     }
 
     struct GameState {

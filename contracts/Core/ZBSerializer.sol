@@ -77,13 +77,27 @@ library ZBSerializer {
         return player;
     }
 
-
     function serializeCardInstance(SerializationBuffer memory buffer, ZBGameMode.CardInstance card) private pure {
         TypesToBytes.intToBytes(buffer.offset, card.instanceId, buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(32);
 
         TypesToBytes.stringToBytes(buffer.offset, bytes(card.name), buffer.buffer);
         buffer.offset -= SizeOf.sizeOfString(card.name);
+
+        TypesToBytes.intToBytes(buffer.offset, card.defense, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+        TypesToBytes.boolToBytes(buffer.offset, card.defenseInherited, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfBool();
+
+        TypesToBytes.intToBytes(buffer.offset, card.attack, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+        TypesToBytes.boolToBytes(buffer.offset, card.attackInherited, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfBool();
+
+        TypesToBytes.intToBytes(buffer.offset, card.gooCost, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+        TypesToBytes.boolToBytes(buffer.offset, card.gooCostInherited, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfBool();
     }
 
     function deserializeCardInstance(SerializationBuffer memory buffer) private pure returns (ZBGameMode.CardInstance) {
@@ -96,6 +110,21 @@ library ZBSerializer {
         card.name = new string(stringLength);
         BytesToTypes.bytesToString(buffer.offset, buffer.buffer, bytes(card.name));
         buffer.offset -= stringLength;
+
+        card.defense = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+        card.defenseInherited = BytesToTypes.bytesToBool(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfBool();
+
+        card.attack = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+        card.attackInherited = BytesToTypes.bytesToBool(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfBool();
+
+        card.gooCost = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+        card.gooCostInherited = BytesToTypes.bytesToBool(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfBool();
 
         return card;
     }

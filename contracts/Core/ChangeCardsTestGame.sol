@@ -17,6 +17,13 @@ contract ChangeCardsTestGame is ZBGameMode  {
 
             for (j = 0; j < gameState.playerStates[i].cardsInHand.length; j++) {
                 gameState.playerStates[i].cardsInHand[j].name = i == 0 ? "Zhampion" : "Gargantua";
+                gameState.playerStates[i].cardsInHand[j].defense = i == 0 ? 3 : 4;
+                gameState.playerStates[i].cardsInHand[j].attack = i == 0 ? 1 : 2;
+                gameState.playerStates[i].cardsInHand[j].gooCost = i == 0 ? 1 : 3;
+
+                gameState.playerStates[i].cardsInHand[j].defenseInherited = false;
+                gameState.playerStates[i].cardsInHand[j].attackInherited = false;
+                gameState.playerStates[i].cardsInHand[j].gooCostInherited = false;
             }
 
             changes.changePlayerCardsInDeck(Player(i), gameState.playerStates[i].cardsInDeck);

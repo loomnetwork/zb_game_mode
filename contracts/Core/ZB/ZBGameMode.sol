@@ -79,6 +79,14 @@ contract ZBGameMode {
         bytes serializedChanges
     );
 
+    function getInterfaceVersion() external pure returns (int) {
+        return 1;
+    }
+
+    function getDataStructureVersion() external pure returns (int) {
+        return 1;
+    }
+
     function beforeMatchStart(bytes) external {
     }
 

@@ -250,16 +250,51 @@ library ZBSerializer {
     function changePlayerCardsInDeck(
         SerializedGameStateChanges memory self,
         ZBGameMode.Player player,
-        ZBGameMode.CardInstance[] cards
+        ZBGameMode.CardInstance[] cards,
+        uint cardCount
         ) internal pure {
-        SerializationBuffer memory buffer = self.buffer;
+        require(
+            cardCount <= cards.length,
+            "cardCount > cards.length"
+        );
 
+        SerializationBuffer memory buffer = self.buffer;
         serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerCardsInDeck, player);
 
-        TypesToBytes.intToBytes(buffer.offset, uint32(cards.length), buffer.buffer);
+        TypesToBytes.intToBytes(buffer.offset, uint32(cardCount), buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(32);
 
-        for (uint i = 0; i < cards.length; i++) {
+        for (uint i = 0; i < cardCount; i++) {
+            serializeCardInstance(buffer, cards[i]);
+        }
+    }
+
+    function changePlayerCardsInDeck(
+        SerializedGameStateChanges memory self,
+        ZBGameMode.Player player,
+        ZBGameMode.CardInstance[] cards
+        ) internal pure {
+        changePlayerCardsInDeck(self, player, cards, cards.length);
+    }
+
+    function changePlayerCardsInHand(
+        SerializedGameStateChanges memory self,
+        ZBGameMode.Player player,
+        ZBGameMode.CardInstance[] cards,
+        uint cardCount
+        ) internal pure {
+        require(
+            cardCount <= cards.length,
+            "cardCount > cards.length"
+        );
+
+        SerializationBuffer memory buffer = self.buffer;
+        serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerCardsInHand, player);
+
+        TypesToBytes.intToBytes(buffer.offset, uint32(cardCount), buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+
+        for (uint i = 0; i < cardCount; i++) {
             serializeCardInstance(buffer, cards[i]);
         }
     }
@@ -269,16 +304,7 @@ library ZBSerializer {
         ZBGameMode.Player player,
         ZBGameMode.CardInstance[] cards
         ) internal pure {
-        SerializationBuffer memory buffer = self.buffer;
-
-        serializeStartGameStateChangeAction(buffer, ZBEnum.GameStateChangeAction.SetPlayerCardsInHand, player);
-
-        TypesToBytes.intToBytes(buffer.offset, uint32(cards.length), buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfInt(32);
-
-        for (uint i = 0; i < cards.length; i++) {
-            serializeCardInstance(buffer, cards[i]);
-        }
+        changePlayerCardsInHand(self, player, cards, cards.length);
     }
 
     function changePlayerInitialCardsInHandCount(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint8 count) internal pure {

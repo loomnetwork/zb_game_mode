@@ -25,8 +25,5 @@ contract('ExampleGame', accounts => {
 
     it('Should ExampleGame be deployed', async () => {
         exampleGame.address.should.not.be.null
-
-        const name = await exampleGame.name.call()
-        name.should.be.equal('ExampleGame')
     })
 })

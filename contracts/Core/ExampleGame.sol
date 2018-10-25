@@ -29,22 +29,16 @@ contract ExampleGame is ZBGameMode  {
 
         // Go through each player's deck and modify it to remove banned cards
         for (uint i = 0; i < gameState.playerStates.length; i++) {
-            uint totalCount = 0;
+            CardInstance[] memory newCards = new CardInstance[](gameState.playerStates[i].cardsInDeck.length);
+            uint nonBannedCount = 0;
             for (uint j = 0; j < gameState.playerStates[i].cardsInDeck.length; j++) {
                 if (!isBanned(gameState.playerStates[i].cardsInDeck[j].mouldName)) {
-                    totalCount++;
+                    newCards[nonBannedCount] = gameState.playerStates[i].cardsInDeck[j];
+                    nonBannedCount++;
                 }
             }
 
-            CardInstance[] memory newCards = new CardInstance[](totalCount);
-            uint count = 0;
-            for (j = 0; j < gameState.playerStates[i].cardsInDeck.length; j++) {
-                if (!isBanned(gameState.playerStates[i].cardsInDeck[j].mouldName)) {
-                    newCards[count] = gameState.playerStates[i].cardsInDeck[j];
-                    count++;
-                }
-            }
-            changes.changePlayerCardsInDeck(Player(i), newCards);
+            changes.changePlayerCardsInDeck(Player(i), newCards, nonBannedCount);
         }
 
         changes.emit();

@@ -10,13 +10,17 @@ library SerialityBinaryStream {
         uint offset;
     }
 
-    function readString(BinaryStream memory self) internal pure returns (string) {
-        uint stringLength = BytesToTypes.getStringSize(self.offset, self.buffer);
-        string memory value = new string(stringLength);
-        BytesToTypes.bytesToString(self.offset, self.buffer, bytes(value));
-        self.offset -= stringLength;
+    function readBytes(BinaryStream memory self) internal pure returns (bytes) {
+        uint length = BytesToTypes.getStringSize(self.offset, self.buffer);
+        bytes memory value = new bytes(length);
+        BytesToTypes.bytesToString(self.offset, self.buffer, value);
+        self.offset -= length;
 
         return value;
+    }
+
+    function readString(BinaryStream memory self) internal pure returns (string) {
+        return string(readBytes(self));
     }
 
     function readBool(BinaryStream memory self) internal pure returns (bool) {
@@ -103,10 +107,14 @@ library SerialityBinaryStream {
         self.offset -= size;
     }
 
-    function writeString(BinaryStream memory self, string value) internal pure {
-        uint size = SizeOf.sizeOfString(value);
-        TypesToBytes.stringToBytes(self.offset, bytes(value), self.buffer);
+    function writeBytes(BinaryStream memory self, bytes value) internal pure {
+        uint size = SizeOf.sizeOfString(string(value));
+        TypesToBytes.stringToBytes(self.offset, value, self.buffer);
         self.offset -= size;
+    }
+
+    function writeString(BinaryStream memory self, string value) internal pure {
+        writeBytes(self, bytes(value));
     }
 
     function memcpy(bytes src, bytes dest, uint len, uint offset) private pure {

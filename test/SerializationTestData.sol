@@ -3,50 +3,41 @@ pragma solidity ^0.4.24;
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 import "../contracts/Core/ZB/ZBGameMode.sol";
-import "../contracts/Core/ZBSerializer.sol";
-import "../contracts/3rdParty/Seriality/BytesToTypes.sol";
-import "../contracts/3rdParty/Seriality/SizeOf.sol";
-import "../contracts/3rdParty/Seriality/TypesToBytes.sol";
+import "../contracts/Core/ZB/ZBSerializer.sol";
+import "../contracts/Core/ZB/SerialityBinaryStream.sol";
 
 contract SerializationTestData {
     using ZBSerializer for ZBSerializer.SerializedGameStateChanges;
     using ZBSerializer for ZBSerializer.SerializedCustomUi;
     using ZBSerializer for ZBGameMode.GameState;
+    using SerialityBinaryStream for SerialityBinaryStream.BinaryStream;
 
     event GameStateChanges (
         bytes serializedChanges
     );
 
     function serializeInts() public pure returns (bytes) {
-        bytes memory buffer = new bytes(64);
-        uint offset = 64;
-        TypesToBytes.intToBytes(offset, int8(1), buffer);
-        offset -= SizeOf.sizeOfInt(8);
-        TypesToBytes.intToBytes(offset, int16(2), buffer);
-        offset -= SizeOf.sizeOfInt(16);
-        TypesToBytes.intToBytes(offset, int32(3), buffer);
-        offset -= SizeOf.sizeOfInt(32);
-        TypesToBytes.intToBytes(offset, int64(4), buffer);
-        offset -= SizeOf.sizeOfInt(64);
-        return buffer;
+        SerialityBinaryStream.BinaryStream memory stream = SerialityBinaryStream.BinaryStream(new bytes(64), 64);
+
+        stream.writeInt8(int8(1));
+        stream.writeInt32(int32(3));
+        stream.writeInt64(int64(4));
+
+        return stream.buffer;
     }
 
     function serializeShortString() public pure returns (bytes) {
-        bytes memory buffer = new bytes(256);
-        uint offset = 256;
-        string memory text = "Cool Button";
-        TypesToBytes.stringToBytes(offset, bytes(text), buffer);
-        offset -= SizeOf.sizeOfString(text);
-        return buffer;
+        SerialityBinaryStream.BinaryStream memory stream = SerialityBinaryStream.BinaryStream(new bytes(256), 256);
+
+        stream.writeString("Cool Button");
+        return stream.buffer;
     }
 
     function serializeLongString() public pure returns (bytes) {
-        bytes memory buffer = new bytes(256);
-        uint offset = 256;
-        string memory text = "Cool Button 1 Cool Button 2 Cool Button 3 Cool Button 4 Cool Button 5 Cool Button 6 Cool Button 7 Cool Button 8 Cool Button 9 Cool Button 0";
-        TypesToBytes.stringToBytes(offset, bytes(text), buffer);
-        offset -= SizeOf.sizeOfString(text);
-        return buffer;
+        SerialityBinaryStream.BinaryStream memory stream = SerialityBinaryStream.BinaryStream(new bytes(256), 256);
+
+        stream.writeString("Cool Button 1 Cool Button 2 Cool Button 3 Cool Button 4 Cool Button 5 Cool Button 6 Cool Button 7 Cool Button 8 Cool Button 9 Cool Button 0");
+        return stream.buffer;
     }
 
     function serializeGameStateChangeActions() public {

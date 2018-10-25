@@ -34,7 +34,7 @@ contract('SerializationTestData', accounts => {
 
         const res = await serializationTestData.serializeInts.call()
 
-        assert.ok(res.endsWith("0400000003000201"))
+        assert.ok(res.endsWith("00000000000000040000000301"))
     })
 
     it('Contract should serialize strings', async () => {

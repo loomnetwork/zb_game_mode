@@ -37,17 +37,15 @@ contract ZBGameMode {
         int64 heroId;
     }
 
-    struct CardPrototype {
-        string name;
-        uint8 gooCost;
-    }
-
     struct CardInstance {
         int32 instanceId;
-        CardPrototype prototype;
+        string mouldName;
         int32 defense;
+        bool defenseInherited;
         int32 attack;
-        string owner;
+        bool attackInherited;
+        int32 gooCost;
+        bool gooCostInherited;
     }
 
     struct GameState {

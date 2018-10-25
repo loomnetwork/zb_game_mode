@@ -77,42 +77,27 @@ library ZBSerializer {
         return player;
     }
 
-    function serializeCardPrototype(SerializationBuffer memory buffer, ZBGameMode.CardPrototype card) private pure {
-        TypesToBytes.stringToBytes(buffer.offset, bytes(card.name), buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfString(card.name);
-
-        TypesToBytes.intToBytes(buffer.offset, card.gooCost, buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfInt(8);
-    }
-
-    function deserializeCardPrototype(SerializationBuffer memory buffer) private pure returns (ZBGameMode.CardPrototype) {
-        ZBGameMode.CardPrototype memory card;
-
-        uint stringLength = BytesToTypes.getStringSize(buffer.offset, buffer.buffer);
-        card.name = new string(stringLength);
-        BytesToTypes.bytesToString(buffer.offset, buffer.buffer, bytes(card.name));
-        buffer.offset -= stringLength;
-
-        card.gooCost = BytesToTypes.bytesToUint8(buffer.offset, buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfInt(8);
-
-        return card;
-    }
-
     function serializeCardInstance(SerializationBuffer memory buffer, ZBGameMode.CardInstance card) private pure {
         TypesToBytes.intToBytes(buffer.offset, card.instanceId, buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(32);
 
-        serializeCardPrototype(buffer, card.prototype);
+        TypesToBytes.stringToBytes(buffer.offset, bytes(card.mouldName), buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfString(card.mouldName);
 
         TypesToBytes.intToBytes(buffer.offset, card.defense, buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(32);
+        TypesToBytes.boolToBytes(buffer.offset, card.defenseInherited, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfBool();
 
         TypesToBytes.intToBytes(buffer.offset, card.attack, buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(32);
+        TypesToBytes.boolToBytes(buffer.offset, card.attackInherited, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfBool();
 
-        TypesToBytes.stringToBytes(buffer.offset, bytes(card.owner), buffer.buffer);
-        buffer.offset -= SizeOf.sizeOfString(card.owner);
+        TypesToBytes.intToBytes(buffer.offset, card.gooCost, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+        TypesToBytes.boolToBytes(buffer.offset, card.gooCostInherited, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfBool();
     }
 
     function deserializeCardInstance(SerializationBuffer memory buffer) private pure returns (ZBGameMode.CardInstance) {
@@ -121,18 +106,25 @@ library ZBSerializer {
         card.instanceId = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(32);
 
-        card.prototype = deserializeCardPrototype(buffer);
+        uint stringLength = BytesToTypes.getStringSize(buffer.offset, buffer.buffer);
+        card.mouldName = new string(stringLength);
+        BytesToTypes.bytesToString(buffer.offset, buffer.buffer, bytes(card.mouldName));
+        buffer.offset -= stringLength;
 
         card.defense = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(32);
+        card.defenseInherited = BytesToTypes.bytesToBool(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfBool();
 
         card.attack = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(32);
+        card.attackInherited = BytesToTypes.bytesToBool(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfBool();
 
-        uint stringLength = BytesToTypes.getStringSize(buffer.offset, buffer.buffer);
-        card.owner = new string(stringLength);
-        BytesToTypes.bytesToString(buffer.offset, buffer.buffer, bytes(card.owner));
-        buffer.offset -= stringLength;
+        card.gooCost = BytesToTypes.bytesToInt32(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfInt(32);
+        card.gooCostInherited = BytesToTypes.bytesToBool(buffer.offset, buffer.buffer);
+        buffer.offset -= SizeOf.sizeOfBool();
 
         return card;
     }
@@ -190,6 +182,27 @@ library ZBSerializer {
 
         TypesToBytes.intToBytes(buffer.offset, uint8(player), buffer.buffer);
         buffer.offset -= SizeOf.sizeOfInt(8);
+    }
+
+    // CardInstance
+
+    function changeMouldName(ZBGameMode.CardInstance memory self, string mouldName) internal pure {
+        self.mouldName = mouldName;
+    }
+
+    function changeDefense(ZBGameMode.CardInstance memory self, uint8 defense) internal pure {
+        self.defense = defense;
+        self.defenseInherited = false;
+    }
+
+    function changeAttack(ZBGameMode.CardInstance memory self, uint8 attack) internal pure {
+        self.attack = attack;
+        self.attackInherited = false;
+    }
+
+    function changeGooCost(ZBGameMode.CardInstance memory self, uint8 gooCost) internal pure {
+        self.gooCost = gooCost;
+        self.gooCostInherited = false;
     }
 
     // SerializedGameStateChanges

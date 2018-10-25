@@ -16,16 +16,16 @@ contract TestSerialization {
         SerialityBinaryStream.BinaryStream memory stream = SerialityBinaryStream.BinaryStream(buffer, buffer.length);
 
         Assert.equal(stream.buffer.length, uint(2), "");
-        Assert.equal(stream.offset, uint(2), "");
+        Assert.equal(stream.remainingBytes, uint(2), "");
         stream.writeInt16(1);
         Assert.equal(stream.buffer.length, uint(32), "");
-        Assert.equal(stream.offset, uint(30), "");
+        Assert.equal(stream.remainingBytes, uint(30), "");
         stream.writeInt16(2);
         Assert.equal(stream.buffer.length, uint(64), "");
-        Assert.equal(stream.offset, uint(60), "");
+        Assert.equal(stream.remainingBytes, uint(60), "");
         stream.writeInt64(3);
         Assert.equal(stream.buffer.length, uint(64), "");
-        Assert.equal(stream.offset, uint(52), "");
+        Assert.equal(stream.remainingBytes, uint(52), "");
     }
 
     function testDeserializeInts() public {

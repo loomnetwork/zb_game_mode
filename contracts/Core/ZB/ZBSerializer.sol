@@ -1,12 +1,15 @@
 pragma solidity ^0.4.24;
 
-import "./ZB/ZBEnum.sol";
-import "./ZB/ZBGameMode.sol";
-import "./../3rdParty/Seriality/BytesToTypes.sol";
-import "./../3rdParty/Seriality/SizeOf.sol";
-import "./../3rdParty/Seriality/TypesToBytes.sol";
+import "./ZBEnum.sol";
+import "./ZBGameMode.sol";
+import "./SerialityBinaryStream.sol";
+import "./../../3rdParty/Seriality/BytesToTypes.sol";
+import "./../../3rdParty/Seriality/SizeOf.sol";
+import "./../../3rdParty/Seriality/TypesToBytes.sol";
 
 library ZBSerializer {
+    using SerialityBinaryStream for SerialityBinaryStream.BinaryStream;
+
     event GameStateChanges (
         bytes serializedChanges
     );

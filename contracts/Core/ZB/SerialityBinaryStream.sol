@@ -7,14 +7,14 @@ import "./../../3rdParty/Seriality/TypesToBytes.sol";
 library SerialityBinaryStream {
     struct BinaryStream {
         bytes buffer;
-        uint offset;
+        uint remainingBytes;
     }
 
     function readBytes(BinaryStream memory self) internal pure returns (bytes) {
-        uint length = BytesToTypes.getStringSize(self.offset, self.buffer);
+        uint length = BytesToTypes.getStringSize(self.remainingBytes, self.buffer);
         bytes memory value = new bytes(length);
-        BytesToTypes.bytesToString(self.offset, self.buffer, value);
-        self.offset -= length;
+        BytesToTypes.bytesToString(self.remainingBytes, self.buffer, value);
+        self.remainingBytes -= length;
 
         return value;
     }
@@ -24,127 +24,127 @@ library SerialityBinaryStream {
     }
 
     function readBool(BinaryStream memory self) internal pure returns (bool) {
-        bool value = BytesToTypes.bytesToBool(self.offset, self.buffer);
-        self.offset -= SizeOf.sizeOfBool();
+        bool value = BytesToTypes.bytesToBool(self.remainingBytes, self.buffer);
+        self.remainingBytes -= SizeOf.sizeOfBool();
         return value;
     }
 
     function readInt8(BinaryStream memory self) internal pure returns (int8) {
-        int8 value = BytesToTypes.bytesToInt8(self.offset, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(8);
+        int8 value = BytesToTypes.bytesToInt8(self.remainingBytes, self.buffer);
+        self.remainingBytes -= SizeOf.sizeOfInt(8);
         return value;
     }
 
     function readInt16(BinaryStream memory self) internal pure returns (int16) {
-        int16 value = BytesToTypes.bytesToInt16(self.offset, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(16);
+        int16 value = BytesToTypes.bytesToInt16(self.remainingBytes, self.buffer);
+        self.remainingBytes -= SizeOf.sizeOfInt(16);
         return value;
     }
 
     function readInt32(BinaryStream memory self) internal pure returns (int32) {
-        int32 value = BytesToTypes.bytesToInt32(self.offset, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(32);
+        int32 value = BytesToTypes.bytesToInt32(self.remainingBytes, self.buffer);
+        self.remainingBytes -= SizeOf.sizeOfInt(32);
         return value;
     }
 
     function readInt64(BinaryStream memory self) internal pure returns (int64) {
-        int64 value = BytesToTypes.bytesToInt64(self.offset, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(64);
+        int64 value = BytesToTypes.bytesToInt64(self.remainingBytes, self.buffer);
+        self.remainingBytes -= SizeOf.sizeOfInt(64);
         return value;
     }
 
     function readUint8(BinaryStream memory self) internal pure returns (uint8) {
-        uint8 value = BytesToTypes.bytesToUint8(self.offset, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(8);
+        uint8 value = BytesToTypes.bytesToUint8(self.remainingBytes, self.buffer);
+        self.remainingBytes -= SizeOf.sizeOfInt(8);
         return value;
     }
 
     function readUint16(BinaryStream memory self) internal pure returns (uint16) {
-        uint16 value = BytesToTypes.bytesToUint16(self.offset, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(16);
+        uint16 value = BytesToTypes.bytesToUint16(self.remainingBytes, self.buffer);
+        self.remainingBytes -= SizeOf.sizeOfInt(16);
         return value;
     }
 
     function readUint32(BinaryStream memory self) internal pure returns (uint32) {
-        uint32 value = BytesToTypes.bytesToUint32(self.offset, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(32);
+        uint32 value = BytesToTypes.bytesToUint32(self.remainingBytes, self.buffer);
+        self.remainingBytes -= SizeOf.sizeOfInt(32);
         return value;
     }
 
     function readUint64(BinaryStream memory self) internal pure returns (uint64) {
-        uint64 value = BytesToTypes.bytesToUint64(self.offset, self.buffer);
-        self.offset -= SizeOf.sizeOfInt(64);
+        uint64 value = BytesToTypes.bytesToUint64(self.remainingBytes, self.buffer);
+        self.remainingBytes -= SizeOf.sizeOfInt(64);
         return value;
     }
 
     function writeBool(BinaryStream memory self, bool value) internal pure {
         uint size = SizeOf.sizeOfBool();
         resizeIfNeeded(self, size);
-        TypesToBytes.boolToBytes(self.offset, value, self.buffer);
-        self.offset -= size;
+        TypesToBytes.boolToBytes(self.remainingBytes, value, self.buffer);
+        self.remainingBytes -= size;
     }
 
     function writeInt8(BinaryStream memory self, int8 value) internal pure {
         uint size = SizeOf.sizeOfInt(8);
         resizeIfNeeded(self, size);
-        TypesToBytes.intToBytes(self.offset, value, self.buffer);
-        self.offset -= size;
+        TypesToBytes.intToBytes(self.remainingBytes, value, self.buffer);
+        self.remainingBytes -= size;
     }
 
     function writeInt16(BinaryStream memory self, int16 value) internal pure {
         uint size = SizeOf.sizeOfInt(16);
         resizeIfNeeded(self, size);
-        TypesToBytes.intToBytes(self.offset, value, self.buffer);
-        self.offset -= size;
+        TypesToBytes.intToBytes(self.remainingBytes, value, self.buffer);
+        self.remainingBytes -= size;
     }
 
     function writeInt32(BinaryStream memory self, int32 value) internal pure {
         uint size = SizeOf.sizeOfInt(32);
         resizeIfNeeded(self, size);
-        TypesToBytes.intToBytes(self.offset, value, self.buffer);
-        self.offset -= size;
+        TypesToBytes.intToBytes(self.remainingBytes, value, self.buffer);
+        self.remainingBytes -= size;
     }
 
     function writeInt64(BinaryStream memory self, int64 value) internal pure {
         uint size = SizeOf.sizeOfInt(64);
         resizeIfNeeded(self, size);
-        TypesToBytes.intToBytes(self.offset, value, self.buffer);
-        self.offset -= size;
+        TypesToBytes.intToBytes(self.remainingBytes, value, self.buffer);
+        self.remainingBytes -= size;
     }
 
     function writeUint8(BinaryStream memory self, uint8 value) internal pure {
         uint size = SizeOf.sizeOfInt(8);
         resizeIfNeeded(self, size);
-        TypesToBytes.uintToBytes(self.offset, value, self.buffer);
-        self.offset -= size;
+        TypesToBytes.uintToBytes(self.remainingBytes, value, self.buffer);
+        self.remainingBytes -= size;
     }
 
     function writeUint16(BinaryStream memory self, uint16 value) internal pure {
         uint size = SizeOf.sizeOfInt(16);
         resizeIfNeeded(self, size);
-        TypesToBytes.uintToBytes(self.offset, value, self.buffer);
-        self.offset -= size;
+        TypesToBytes.uintToBytes(self.remainingBytes, value, self.buffer);
+        self.remainingBytes -= size;
     }
 
     function writeUint32(BinaryStream memory self, uint32 value) internal pure {
         uint size = SizeOf.sizeOfInt(32);
         resizeIfNeeded(self, size);
-        TypesToBytes.uintToBytes(self.offset, value, self.buffer);
-        self.offset -= size;
+        TypesToBytes.uintToBytes(self.remainingBytes, value, self.buffer);
+        self.remainingBytes -= size;
     }
 
     function writeUint64(BinaryStream memory self, uint64 value) internal pure {
         uint size = SizeOf.sizeOfInt(64);
         resizeIfNeeded(self, size);
-        TypesToBytes.uintToBytes(self.offset, value, self.buffer);
-        self.offset -= size;
+        TypesToBytes.uintToBytes(self.remainingBytes, value, self.buffer);
+        self.remainingBytes -= size;
     }
 
     function writeBytes(BinaryStream memory self, bytes value) internal pure {
         uint size = SizeOf.sizeOfString(string(value));
         resizeIfNeeded(self, size);
-        TypesToBytes.stringToBytes(self.offset, value, self.buffer);
-        self.offset -= size;
+        TypesToBytes.stringToBytes(self.remainingBytes, value, self.buffer);
+        self.remainingBytes -= size;
     }
 
     function writeString(BinaryStream memory self, string value) internal pure {
@@ -161,7 +161,7 @@ library SerialityBinaryStream {
 
         uint size = words * 32;
 
-        int newOffset = int(self.offset) - int(size);
+        int newOffset = int(self.remainingBytes) - int(size);
         if (newOffset >= 0)
             return;
 
@@ -180,7 +180,7 @@ library SerialityBinaryStream {
 
         bytes memory newBuffer = new bytes(newLength);
         memcpy(self.buffer, newBuffer, newLength - oldLength, oldLength);
-        self.offset += newLength - oldLength;
+        self.remainingBytes += newLength - oldLength;
         self.buffer = newBuffer;
     }
 

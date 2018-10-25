@@ -11,11 +11,27 @@ contract TestSerialization {
     using ZBSerializer for ZBGameMode.GameState;
     using SerialityBinaryStream for SerialityBinaryStream.BinaryStream;
 
+    function testBinaryStreamResize() public {
+        bytes memory buffer = new bytes(2);
+        SerialityBinaryStream.BinaryStream memory stream = SerialityBinaryStream.BinaryStream(buffer, buffer.length);
+
+        Assert.equal(stream.buffer.length, uint(2), "");
+        Assert.equal(stream.offset, uint(2), "");
+        stream.writeInt16(1);
+        Assert.equal(stream.buffer.length, uint(32), "");
+        Assert.equal(stream.offset, uint(30), "");
+        stream.writeInt16(2);
+        Assert.equal(stream.buffer.length, uint(64), "");
+        Assert.equal(stream.offset, uint(60), "");
+        stream.writeInt64(3);
+        Assert.equal(stream.buffer.length, uint(64), "");
+        Assert.equal(stream.offset, uint(52), "");
+    }
+
     function testDeserializeInts() public {
         bytes memory buffer = hex'0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000301';
         SerialityBinaryStream.BinaryStream memory stream = SerialityBinaryStream.BinaryStream(buffer, buffer.length);
 
-        uint offset = buffer.length;
         Assert.equal(int(stream.readInt8()), int(1), "");
         Assert.equal(int(stream.readInt32()), int(3), "");
         Assert.equal(int(stream.readInt64()), int(4), "");

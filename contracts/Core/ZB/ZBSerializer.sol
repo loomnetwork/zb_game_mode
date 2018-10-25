@@ -6,6 +6,8 @@ import "./SerialityBinaryStream.sol";
 
 library ZBSerializer {
     using SerialityBinaryStream for SerialityBinaryStream.BinaryStream;
+    uint constant defaultSerializedGameStateChangesBufferSize = 512;
+    uint constant defaultSerializedCustomUiBufferSize = 512;
 
     event GameStateChanges (
         bytes serializedChanges
@@ -146,7 +148,7 @@ library ZBSerializer {
     // SerializedGameStateChanges
 
     function init(SerializedGameStateChanges memory self) internal pure {
-        init(self, 2 ** 15);
+        init(self, defaultSerializedGameStateChangesBufferSize);
     }
 
     function init(SerializedGameStateChanges memory self, uint bufferSize) internal pure {
@@ -271,7 +273,7 @@ library ZBSerializer {
     // SerializedCustomUi
 
     function init(SerializedCustomUi memory self) internal pure {
-        init(self, 2 ** 14);
+        init(self, defaultSerializedCustomUiBufferSize);
     }
 
     function init(SerializedCustomUi memory self, uint bufferSize) internal pure {

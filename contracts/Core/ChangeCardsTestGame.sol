@@ -28,6 +28,9 @@ contract ChangeCardsTestGame is ZBGameMode  {
             changes.changePlayerCardsInHand(Player(i), gameState.playerStates[i].cardsInHand);
         }
 
+        changes.changePlayerTurnTime(Player.Player1, 4);
+        changes.changePlayerTurnTime(Player.Player2, 30);
+
         changes.emit();
     }
 }

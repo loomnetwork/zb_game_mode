@@ -23,6 +23,7 @@ contract ZBGameMode {
         uint8 defense;
         uint8 currentGoo;
         uint8 gooVials;
+        uint32 turnTime;
         //bool hasDrawnCard = 11;
         //repeated CardInstance cardsInGraveyard = 12;
         uint8 initialCardsInHandCount;

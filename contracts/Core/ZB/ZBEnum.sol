@@ -45,7 +45,8 @@ library ZBEnum {
             SetPlayerInitialCardsInHandCount,
             SetPlayerMaxCardsInPlay,
             SetPlayerMaxCardsInHand,
-            SetPlayerMaxGooVials
+            SetPlayerMaxGooVials,
+            SetPlayerTurnTime
     }
 
     enum CustomUiElement

@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "./ZBEnum.sol";
-import "./../ZBSerializer.sol";
+import "./ZBSerializer.sol";
 
 contract ZBGameMode {
     using ZBSerializer for ZBSerializer.SerializedGameStateChanges;

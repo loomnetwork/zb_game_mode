@@ -46,6 +46,7 @@ library ZBSerializer {
         player.defense = stream.readUint8();
         player.currentGoo = stream.readUint8();
         player.gooVials = stream.readUint8();
+        player.turnTime = stream.readUint32();
         player.initialCardsInHandCount = stream.readUint8();
         player.maxCardsInPlay = stream.readUint8();
         player.maxCardsInHand = stream.readUint8();
@@ -268,6 +269,13 @@ library ZBSerializer {
 
         serializeStartGameStateChangeAction(stream, ZBEnum.GameStateChangeAction.SetPlayerMaxGooVials, player);
         stream.writeUint8(count);
+    }
+
+    function changePlayerTurnTime(SerializedGameStateChanges memory self, ZBGameMode.Player player, uint32 turnTime) internal pure {
+        SerialityBinaryStream.BinaryStream memory stream = self.stream;
+
+        serializeStartGameStateChangeAction(stream, ZBEnum.GameStateChangeAction.SetPlayerTurnTime, player);
+        stream.writeUint32(turnTime);
     }
 
     // SerializedCustomUi
